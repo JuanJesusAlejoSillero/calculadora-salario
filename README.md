@@ -25,7 +25,7 @@ Los resultados proporcionados por la herramienta son **meramente orientativos** 
    [https://sh.juanje.net/neto](https://sh.juanje.net/neto)
 
 2. Ajusta el salario bruto anual.
-3. Selecciona el régimen fiscal, número de hijos y rango de edad.
+3. Selecciona el territorio, número de hijos y rango de edad.
 4. Elige el número de pagas al año.
 
 Si lo deseas, puedes activar el modo **Comparar salarios** para ver dos situaciones diferentes lado a lado.
@@ -36,7 +36,7 @@ Si lo deseas, puedes activar el modo **Comparar salarios** para ver dos situacio
 
 - Salario bruto anual ajustable entre 0 € y 300.000 €.
 - Cálculo en 12, 13, 14, 15 o 16 pagas.
-- Régimen fiscal configurable entre régimen común, Navarra y País Vasco.
+- Escala diferenciada según territorio.
 - Mínimos por descendientes para 0 a 5 hijos.
 - Ajuste del mínimo personal por edad del contribuyente.
 - Deducción por obtención de rendimientos del trabajo.

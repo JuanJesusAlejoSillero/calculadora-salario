@@ -386,6 +386,7 @@
       color: var(--text-primary);
       cursor: pointer;
       transition: all 0.2s;
+      max-width: 100%;
     }
 
     select:focus {
@@ -658,12 +659,14 @@
       <section class="page-notes" aria-label="Notas fiscales y legales">
         <aside class="note">
           <strong>📋 Fiscalidad 2026 · IRPF por comunidades autónomas</strong><br>
-          • <strong>Régimen Común</strong>: Andalucía, Aragón, Asturias, Baleares, Canarias, Cantabria, Castilla-La Mancha, Castilla y León, Cataluña, C. Valenciana, Extremadura, Galicia, La Rioja, Madrid, Murcia, Ceuta, Melilla.<br>
-          • <strong>Navarra (Régimen Foral)</strong>: escala propia; en esta calculadora se aproxima con una escala específica.<br>
-          • <strong>País Vasco (Régimen Foral)</strong>: Bizkaia, Gipuzkoa y Araba gestionan su propio IRPF; aquí se aplica una escala agregada.<br>
+          • <strong>Régimen común</strong>: cada comunidad autónoma tiene su propia escala autonómica; esta calculadora aplica tablas específicas para Andalucía, Aragón, Asturias, Baleares, Canarias, Cantabria, Castilla-La Mancha, Castilla y León, Cataluña, Comunitat Valenciana, Extremadura, Galicia, La Rioja, Madrid y Murcia.<br>
+          • <strong>Navarra (Régimen Foral)</strong>: mantiene una escala propia; en esta calculadora se conserva una aproximación específica.<br>
+          • <strong>País Vasco (Régimen Foral)</strong>: Bizkaia, Gipuzkoa y Araba gestionan su propio IRPF; aquí se aplica una escala agregada y orientativa.<br>
+          • <strong>Ceuta y Melilla</strong>: se aplica la escala especial publicada por la AEAT y una deducción del 60% sobre la cuota íntegra, asumiendo residencia efectiva y que todo el salario se obtiene allí.<br>
           • <strong>Mínimos por descendientes</strong>: 2.400€ (1º), 2.700€ (2º), 4.000€ (3º), 4.500€ (4º+).<br>
           • <strong>Reducción por rendimientos del trabajo</strong> (art. 20): se aplica sobre el rendimiento neto del trabajo en salarios bajos.<br>
           • <strong>Deducción para rentas bajas (SMI 2026)</strong>: hasta 590,89€ en cuota para salarios hasta 17.094€, decreciente hasta 20.048,45€ y limitada por la cuota disponible.<br>
+          • Los casos con cambio de residencia dentro del año o con rentas obtenidas fuera de Ceuta/Melilla no se prorratean en esta versión.<br>
           • <strong>Edad del contribuyente</strong>: A partir de 65 años se añaden 1.150€ al mínimo personal; desde 75 años, 8.100€ total (5.550€ + 2.550€).<br>
           • La cotización a la SS del trabajador es del 6,5% con base máxima 58.914€ anuales.
         </aside>
@@ -693,12 +696,18 @@
       { min: 300000, max: Infinity, rate: 0.245 }
     ];
 
-    // Escalas autonómicas (tipo autonómico por tramo)
+    const CEUTA_MELILLA_SCALE = [
+      { min: 0, max: 12450, rate: 0.095 },
+      { min: 12450, max: 20200, rate: 0.12 },
+      { min: 20200, max: 35200, rate: 0.15 },
+      { min: 35200, max: 60000, rate: 0.185 },
+      { min: 60000, max: Infinity, rate: 0.225 }
+    ];
+
+    // Escalas autonómicas por comunidad según tablas de la AEAT
+    // (Manual IRPF 2024, páginas actualizadas el 10/04/2025).
     const AUTONOMIC_SCALES = {
-      // RÉGIMEN COMÚN (CCAA que usan la escala estándar sin desviaciones agresivas)
-      // Nota: La mayoría siguen la escala autonómica por defecto (9.5%/12%/15%/18.5%/22.5%/22.5%)
-      // pero algunas tienen leves variaciones en los límites de tramo. Para simplificar y ser precisos,
-      // utilizamos la tabla oficial publicada por la AEAT para 2026 en territorio común.
+      // Compatibilidad con estados antiguos / fallback aproximado.
       "comun": [
         { min: 0, max: 12450, rate: 0.095 },
         { min: 12450, max: 20200, rate: 0.12 },
@@ -707,6 +716,144 @@
         { min: 60000, max: 300000, rate: 0.225 },
         { min: 300000, max: Infinity, rate: 0.225 } // último tramo igual
       ],
+      "andalucia": [
+        { min: 0, max: 13000, rate: 0.095 },
+        { min: 13000, max: 21100, rate: 0.12 },
+        { min: 21100, max: 35200, rate: 0.15 },
+        { min: 35200, max: 60000, rate: 0.185 },
+        { min: 60000, max: Infinity, rate: 0.225 }
+      ],
+      "aragon": [
+        { min: 0, max: 13072.5, rate: 0.095 },
+        { min: 13072.5, max: 21210, rate: 0.12 },
+        { min: 21210, max: 36960, rate: 0.15 },
+        { min: 36960, max: 52500, rate: 0.185 },
+        { min: 52500, max: 60000, rate: 0.205 },
+        { min: 60000, max: 80000, rate: 0.23 },
+        { min: 80000, max: 90000, rate: 0.24 },
+        { min: 90000, max: 130000, rate: 0.25 },
+        { min: 130000, max: Infinity, rate: 0.255 }
+      ],
+      "asturias": [
+        { min: 0, max: 12450, rate: 0.1 },
+        { min: 12450, max: 17707.2, rate: 0.12 },
+        { min: 17707.2, max: 33007.2, rate: 0.14 },
+        { min: 33007.2, max: 53407.2, rate: 0.185 },
+        { min: 53407.2, max: 70000, rate: 0.215 },
+        { min: 70000, max: 90000, rate: 0.225 },
+        { min: 90000, max: 175000, rate: 0.25 },
+        { min: 175000, max: Infinity, rate: 0.255 }
+      ],
+      "baleares": [
+        { min: 0, max: 10000, rate: 0.09 },
+        { min: 10000, max: 18000, rate: 0.1125 },
+        { min: 18000, max: 30000, rate: 0.1425 },
+        { min: 30000, max: 48000, rate: 0.175 },
+        { min: 48000, max: 70000, rate: 0.19 },
+        { min: 70000, max: 90000, rate: 0.2175 },
+        { min: 90000, max: 120000, rate: 0.2275 },
+        { min: 120000, max: 175000, rate: 0.2375 },
+        { min: 175000, max: Infinity, rate: 0.2475 }
+      ],
+      "canarias": [
+        { min: 0, max: 13465, rate: 0.09 },
+        { min: 13465, max: 19022, rate: 0.115 },
+        { min: 19022, max: 35185, rate: 0.14 },
+        { min: 35185, max: 56382, rate: 0.185 },
+        { min: 56382, max: 91350, rate: 0.235 },
+        { min: 91350, max: 121200, rate: 0.25 },
+        { min: 121200, max: Infinity, rate: 0.26 }
+      ],
+      "cantabria": [
+        { min: 0, max: 13000, rate: 0.085 },
+        { min: 13000, max: 21000, rate: 0.11 },
+        { min: 21000, max: 35200, rate: 0.145 },
+        { min: 35200, max: 60000, rate: 0.18 },
+        { min: 60000, max: 90000, rate: 0.225 },
+        { min: 90000, max: Infinity, rate: 0.245 }
+      ],
+      "castilla_mancha": [
+        { min: 0, max: 12450, rate: 0.095 },
+        { min: 12450, max: 20200, rate: 0.12 },
+        { min: 20200, max: 35200, rate: 0.15 },
+        { min: 35200, max: 60000, rate: 0.185 },
+        { min: 60000, max: Infinity, rate: 0.225 }
+      ],
+      "castilla_leon": [
+        { min: 0, max: 12450, rate: 0.09 },
+        { min: 12450, max: 20200, rate: 0.12 },
+        { min: 20200, max: 35200, rate: 0.14 },
+        { min: 35200, max: 53407.2, rate: 0.185 },
+        { min: 53407.2, max: Infinity, rate: 0.215 }
+      ],
+      "cataluna": [
+        { min: 0, max: 12450, rate: 0.105 },
+        { min: 12450, max: 17707.2, rate: 0.12 },
+        { min: 17707.2, max: 21000, rate: 0.14 },
+        { min: 21000, max: 33007.2, rate: 0.15 },
+        { min: 33007.2, max: 53407.2, rate: 0.188 },
+        { min: 53407.2, max: 90000, rate: 0.215 },
+        { min: 90000, max: 120000, rate: 0.235 },
+        { min: 120000, max: 175000, rate: 0.245 },
+        { min: 175000, max: Infinity, rate: 0.255 }
+      ],
+      "extremadura": [
+        { min: 0, max: 12450, rate: 0.08 },
+        { min: 12450, max: 20200, rate: 0.1 },
+        { min: 20200, max: 24200, rate: 0.16 },
+        { min: 24200, max: 35200, rate: 0.175 },
+        { min: 35200, max: 60000, rate: 0.21 },
+        { min: 60000, max: 80200, rate: 0.235 },
+        { min: 80200, max: 99200, rate: 0.24 },
+        { min: 99200, max: 120200, rate: 0.245 },
+        { min: 120200, max: Infinity, rate: 0.25 }
+      ],
+      "galicia": [
+        { min: 0, max: 12985.35, rate: 0.09 },
+        { min: 12985.35, max: 21068.6, rate: 0.1165 },
+        { min: 21068.6, max: 35200, rate: 0.149 },
+        { min: 35200, max: 60000, rate: 0.184 },
+        { min: 60000, max: Infinity, rate: 0.225 }
+      ],
+      "la_rioja": [
+        { min: 0, max: 12450, rate: 0.08 },
+        { min: 12450, max: 20200, rate: 0.106 },
+        { min: 20200, max: 35200, rate: 0.136 },
+        { min: 35200, max: 40000, rate: 0.178 },
+        { min: 40000, max: 50000, rate: 0.183 },
+        { min: 50000, max: 60000, rate: 0.19 },
+        { min: 60000, max: 120000, rate: 0.245 },
+        { min: 120000, max: Infinity, rate: 0.27 }
+      ],
+      "madrid": [
+        { min: 0, max: 13362.22, rate: 0.085 },
+        { min: 13362.22, max: 19004.63, rate: 0.107 },
+        { min: 19004.63, max: 35425.68, rate: 0.128 },
+        { min: 35425.68, max: 57320.4, rate: 0.174 },
+        { min: 57320.4, max: Infinity, rate: 0.205 }
+      ],
+      "murcia": [
+        { min: 0, max: 12450, rate: 0.095 },
+        { min: 12450, max: 20200, rate: 0.112 },
+        { min: 20200, max: 34000, rate: 0.133 },
+        { min: 34000, max: 60000, rate: 0.179 },
+        { min: 60000, max: Infinity, rate: 0.225 }
+      ],
+      "valencia": [
+        { min: 0, max: 12000, rate: 0.09 },
+        { min: 12000, max: 22000, rate: 0.12 },
+        { min: 22000, max: 32000, rate: 0.15 },
+        { min: 32000, max: 42000, rate: 0.175 },
+        { min: 42000, max: 52000, rate: 0.2 },
+        { min: 52000, max: 62000, rate: 0.225 },
+        { min: 62000, max: 72000, rate: 0.25 },
+        { min: 72000, max: 100000, rate: 0.265 },
+        { min: 100000, max: 150000, rate: 0.275 },
+        { min: 150000, max: 200000, rate: 0.285 },
+        { min: 200000, max: Infinity, rate: 0.295 }
+      ],
+      "ceuta": CEUTA_MELILLA_SCALE,
+      "melilla": CEUTA_MELILLA_SCALE,
       // NAVARRA
       "navarra": [
         { min: 0, max: 12450, rate: 0.09 },
@@ -727,6 +874,43 @@
       ]
     };
 
+    const TERRITORY_GROUPS = [
+      {
+        label: "Comunidades de régimen común",
+        options: [
+          { value: "andalucia", label: "Andalucía" },
+          { value: "aragon", label: "Aragón" },
+          { value: "asturias", label: "Asturias" },
+          { value: "baleares", label: "Illes Balears" },
+          { value: "canarias", label: "Canarias" },
+          { value: "cantabria", label: "Cantabria" },
+          { value: "castilla_mancha", label: "Castilla-La Mancha" },
+          { value: "castilla_leon", label: "Castilla y León" },
+          { value: "cataluna", label: "Cataluña" },
+          { value: "extremadura", label: "Extremadura" },
+          { value: "galicia", label: "Galicia" },
+          { value: "la_rioja", label: "La Rioja" },
+          { value: "madrid", label: "Madrid" },
+          { value: "murcia", label: "Murcia" },
+          { value: "valencia", label: "Comunitat Valenciana" }
+        ]
+      },
+      {
+        label: "Ciudades autónomas",
+        options: [
+          { value: "ceuta", label: "Ceuta" },
+          { value: "melilla", label: "Melilla" }
+        ]
+      },
+      {
+        label: "Regímenes forales",
+        options: [
+          { value: "navarra", label: "Navarra (Foral, aprox.)" },
+          { value: "euskadi", label: "País Vasco (Foral, aprox.)" }
+        ]
+      }
+    ];
+
     // Constantes generales
     const SS_RATE = 0.065;
     const SS_MAX_ANUAL = 58914;
@@ -740,6 +924,7 @@
     const DEDUCCION_SMI_2026_MAX = 590.89;
     const DEDUCCION_SMI_2026_TRAMO1 = 17094;
     const DEDUCCION_SMI_2026_TRAMO2 = 20048.45;
+    const DEDUCCION_CEUTA_MELILLA_RATE = 0.60;
 
     // Art. 20 LIRPF. El umbral se calcula sobre el rendimiento neto antes de restar
     // los 2.000 EUR generales del art. 19.2.f.
@@ -796,6 +981,10 @@
       if (rangoEdad === "75+") return 8100;   // 5.550 + 2.550
       if (rangoEdad === "65-74") return 6700; // 5.550 + 1.150
       return MINIMO_PERSONAL_BASE;             // menor de 65
+    }
+
+    function aplicaDeduccionCeutaMelilla(territorio) {
+      return territorio === "ceuta" || territorio === "melilla";
     }
 
     function calcularCuotaProgresiva(baseLiquidable, tramos) {
@@ -875,12 +1064,19 @@
         minimoPersonalFamiliar,
         territorio
       );
+
+      // Para Ceuta y Melilla asumimos residencia efectiva y que todo el salario del cálculo
+      // es rendimiento del trabajo obtenido íntegramente allí.
+      const deduccionCeutaMelilla = aplicaDeduccionCeutaMelilla(territorio)
+        ? cuotaTrasMinimo * DEDUCCION_CEUTA_MELILLA_RATE
+        : 0;
+      const cuotaTrasDeduccionTerritorial = Math.max(0, cuotaTrasMinimo - deduccionCeutaMelilla);
       
       const deduccionRentasBajas = Math.min(
-        cuotaTrasMinimo,
+        cuotaTrasDeduccionTerritorial,
         deduccionRentasBajas2026(bruto)
       );
-      const tax = Math.max(0, cuotaTrasMinimo - deduccionRentasBajas);
+      const tax = Math.max(0, cuotaTrasDeduccionTerritorial - deduccionRentasBajas);
       
       const neto = bruto - ss - tax;
       const efectivaTotal = (ss + tax) / bruto;
@@ -901,6 +1097,8 @@
         efectoMinimo,
         cuotaAntesMinimo,
         cuotaTrasMinimo,
+        deduccionCeutaMelilla,
+        cuotaTrasDeduccionTerritorial,
         deduccionRentasBajas
       };
     }
@@ -924,6 +1122,10 @@
         rows.push(`<div class="breakdown-row"><span class="breakdown-label">Efecto mínimo personal y familiar</span><span class="breakdown-value positive">− ${fmt(data.efectoMinimo)}</span></div>`);
       }
 
+      if (data.deduccionCeutaMelilla > 0) {
+        rows.push(`<div class="breakdown-row"><span class="breakdown-label">Deducción Ceuta/Melilla (60%)</span><span class="breakdown-value positive">− ${fmt(data.deduccionCeutaMelilla)}</span></div>`);
+      }
+
       if (data.deduccionRentasBajas > 0) {
         rows.push(`<div class="breakdown-row"><span class="breakdown-label">Deducción rentas bajas 2026</span><span class="breakdown-value positive">− ${fmt(data.deduccionRentasBajas)}</span></div>`);
       }
@@ -931,11 +1133,19 @@
       return rows.join('');
     }
 
+    function renderTerritoryOptions(selectedTerritory) {
+      return TERRITORY_GROUPS.map(group => `
+        <optgroup label="${group.label}">
+          ${group.options.map(option => `<option value="${option.value}" ${selectedTerritory === option.value ? 'selected' : ''}>${option.label}</option>`).join('')}
+        </optgroup>
+      `).join('');
+    }
+
     // Estado global
     let currentMode = 'single';
     let calculators = {
-      calc1: { bruto: 32400, pagas: 14, hijos: 0, territorio: "comun", rangoEdad: "menor65" },
-      calc2: { bruto: 41600, pagas: 14, hijos: 0, territorio: "comun", rangoEdad: "menor65" }
+      calc1: { bruto: 32400, pagas: 12, hijos: 0, territorio: "andalucia", rangoEdad: "menor65" },
+      calc2: { bruto: 41600, pagas: 14, hijos: 0, territorio: "castilla_mancha", rangoEdad: "menor65" }
     };
 
     // Renderizado de cada calculadora
@@ -972,9 +1182,7 @@
             <div class="region-selector inline-select">
               <label for="${territorySelectId}">📍 Comunidad / Régimen fiscal:</label>
               <select id="${territorySelectId}" class="territorio-select" data-calc="${calcId}">
-                <option value="comun" ${state.territorio === 'comun' ? 'selected' : ''}>🏛️ Régimen Común</option>
-                <option value="navarra" ${state.territorio === 'navarra' ? 'selected' : ''}>🌿 Navarra (Foral)</option>
-                <option value="euskadi" ${state.territorio === 'euskadi' ? 'selected' : ''}>⛰️ País Vasco (Foral)</option>
+                ${renderTerritoryOptions(state.territorio)}
               </select>
             </div>
             <div class="inline-select inline-gap">
