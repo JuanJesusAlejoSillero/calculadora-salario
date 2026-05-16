@@ -42,7 +42,8 @@ Si lo deseas, puedes activar el modo **Comparar salarios** para ver dos situacio
 - Deducción por obtención de rendimientos del trabajo.
 - Deducción adicional para rentas bajas vinculada al SMI 2026.
 - Modo comparación para evaluar dos escenarios simultáneos.
-- Tema oscuro y claro.
+- Tema oscuro y claro y detección automática del modo preferido en la primera visita.
+- Funcionamiento completamente offline, sin necesidad de conexión a Internet.
 
 ## ⚙️ Modelo de cálculo
 

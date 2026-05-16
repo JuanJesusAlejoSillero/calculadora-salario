@@ -4,9 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>Calculadora Salario Neto · España 2026</title>
+  <script>
+    (function() {
+      const storageKey = 'theme';
+      const storedTheme = localStorage.getItem(storageKey);
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const resolvedTheme = storedTheme === 'light' || storedTheme === 'dark'
+        ? storedTheme
+        : (systemPrefersDark ? 'dark' : 'light');
+
+      document.documentElement.classList.toggle('dark-mode', resolvedTheme === 'dark');
+    })();
+  </script>
   <style>
     :root {
-      /* Light theme (fallback) — Dark is default via JS */
+      /* Light theme fallback; the resolved theme is applied before first paint */
       --bg-primary: #fcfaf7;
       --bg-secondary: #ffffff;
       --bg-tertiary: #f3f1ec;
@@ -24,7 +36,7 @@
       --shadow-lg: 0 12px 20px -8px rgba(0,0,0,0.08);
     }
 
-    body.dark-mode {
+    html.dark-mode {
       --bg-primary: #0a0c10;
       --bg-secondary: #14171c;
       --bg-tertiary: #1e2229;
@@ -477,10 +489,10 @@
     .segment-irpf {
       background: linear-gradient(90deg, #ec8c49, #f5a97f);
     }
-    body.dark-mode .segment-ss {
+    html.dark-mode .segment-ss {
       background: linear-gradient(90deg, #6c727d, #8e95a3);
     }
-    body.dark-mode .segment-irpf {
+    html.dark-mode .segment-irpf {
       background: linear-gradient(90deg, #d97846, #f5a97f);
     }
 
@@ -618,7 +630,7 @@
     }
   </style>
 </head>
-<body class="dark-mode">
+<body>
   <div class="container">
     <header>
       <div class="header-toolbar">
@@ -1134,25 +1146,53 @@
     // Toggle tema oscuro/claro
     const themeToggle = document.getElementById('themeToggle');
     const themeTextSpan = document.getElementById('themeText');
-    function setTheme(theme) {
+    const themeStorageKey = 'theme';
+    const systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function resolveTheme() {
+      const savedTheme = localStorage.getItem(themeStorageKey);
+
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        return savedTheme;
+      }
+
+      return systemThemeQuery.matches ? 'dark' : 'light';
+    }
+
+    function updateThemeToggle(theme) {
       if (theme === 'dark') {
-        document.body.classList.add('dark-mode');
         themeTextSpan.innerText = 'Modo claro';
         themeToggle.setAttribute('aria-pressed', 'true');
-        localStorage.setItem('theme', 'dark');
       } else {
-        document.body.classList.remove('dark-mode');
         themeTextSpan.innerText = 'Modo oscuro';
         themeToggle.setAttribute('aria-pressed', 'false');
-        localStorage.setItem('theme', 'light');
       }
     }
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') setTheme('light');
-    else setTheme('dark');
+
+    function applyTheme(theme, persistPreference = true) {
+      document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+      updateThemeToggle(theme);
+
+      if (persistPreference) {
+        localStorage.setItem(themeStorageKey, theme);
+      }
+    }
+
+    applyTheme(resolveTheme(), false);
+
+    systemThemeQuery.addEventListener('change', (event) => {
+      const savedTheme = localStorage.getItem(themeStorageKey);
+
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        return;
+      }
+
+      applyTheme(event.matches ? 'dark' : 'light', false);
+    });
+
     themeToggle.addEventListener('click', () => {
-      const isDark = document.body.classList.contains('dark-mode');
-      setTheme(isDark ? 'light' : 'dark');
+      const isDark = document.documentElement.classList.contains('dark-mode');
+      applyTheme(isDark ? 'light' : 'dark');
     });
 
     renderCalculators();
