@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Calculadora Salario Neto · España 2026</title>
+  <style>
+    :root {
+      /* Light theme (fallback) — Dark is default via JS */
+      --bg-primary: #fcfaf7;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f3f1ec;
+      --border-color: #e6e3db;
+      --text-primary: #1f1e1b;
+      --text-secondary: #5c5a55;
+      --text-tertiary: #85827b;
+      --accent-blue: #6c47ff;
+      --accent-blue-hover: #8a6bff;
+      --accent-green: #0b8f6e;
+      --accent-red: #e35f5f;
+      --accent-orange: #ec8c49;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.03), 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 8px -2px rgba(0,0,0,0.04), 0 2px 4px -2px rgba(0,0,0,0.02);
+      --shadow-lg: 0 12px 20px -8px rgba(0,0,0,0.08);
+    }
+
+    body.dark-mode {
+      --bg-primary: #0a0c10;
+      --bg-secondary: #14171c;
+      --bg-tertiary: #1e2229;
+      --border-color: #2c313a;
+      --text-primary: #eceff4;
+      --text-secondary: #b3b9c5;
+      --text-tertiary: #8a8f99;
+      --accent-blue: #8a6bff;
+      --accent-blue-hover: #a07eff;
+      --accent-green: #3dd0c7;
+      --accent-red: #ff7d7d;
+      --accent-orange: #ffb976;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.15);
+      --shadow-md: 0 4px 8px -2px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
+      --shadow-lg: 0 12px 20px -8px rgba(0,0,0,0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      line-height: 1.5;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 2rem;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .title-emoji {
+      background: none;
+      -webkit-text-fill-color: initial;
+      color: inherit;
+    }
+    .title-text {
+      background: linear-gradient(135deg, var(--accent-blue) 0%, #a07eff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    .repo-link {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .repo-link a {
+      color: var(--accent-blue);
+      text-decoration: none;
+      border-bottom: 1px dashed var(--accent-blue);
+    }
+
+    .repo-link a:hover {
+      color: var(--accent-blue-hover);
+      border-bottom-color: var(--accent-blue-hover);
+    }
+
+    .note a {
+      color: #b45309;
+      text-decoration: none;
+      border-bottom: 1px dashed #b45309;
+      font-weight: 600;
+    }
+
+    .note a:hover {
+      color: #d97706;
+      border-bottom-color: #d97706;
+    }
+
+    .theme-switch {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 40px;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      z-index: 10;
+      font-family: inherit;
+      color: inherit;
+    }
+    .theme-switch:hover {
+      background: var(--accent-blue);
+      color: white;
+      border-color: var(--accent-blue);
+    }
+
+    .mode-selector {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .mode-btn {
+      padding: 0.6rem 1.4rem;
+      border: 1.5px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      border-radius: 60px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .mode-btn:hover {
+      border-color: var(--accent-blue);
+      background: rgba(108, 71, 255, 0.1);
+      color: var(--accent-blue);
+    }
+
+    .mode-btn.active {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: white;
+      box-shadow: 0 2px 6px rgba(108, 71, 255, 0.25);
+    }
+
+    .calculators {
+      display: grid;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .calculators.compare-mode {
+      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+    }
+
+    .calculators.single-mode {
+      grid-template-columns: 1fr;
+      max-width: 820px;
+      margin: 2rem auto 0;
+    }
+
+    .calculator {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      padding: 1.8rem;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .calculator:hover {
+      border-color: var(--accent-blue);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    .calc-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--accent-blue);
+      letter-spacing: -0.2px;
+    }
+
+    .section {
+      margin-bottom: 1.75rem;
+    }
+
+    .label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: block;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .salary-display {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 5px;
+      border-radius: 5px;
+      background: var(--bg-tertiary);
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      cursor: pointer;
+      transition: transform 0.1s ease;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      border: 2px solid white;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: var(--accent-blue-hover);
+      transform: scale(1.2);
+    }
+
+    .range-limits {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      margin-top: 0.5rem;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    input[type="number"] {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.6rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      width: 130px;
+      transition: all 0.2s;
+    }
+
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(108, 71, 255, 0.15);
+    }
+
+    .paycheck-buttons {
+      display: flex;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    .paycheck-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border: 1.5px solid var(--border-color);
+      border-radius: 40px;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--bg-primary);
+    }
+
+    .paycheck-btn:hover {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+      background: rgba(108, 71, 255, 0.1);
+    }
+
+    .paycheck-btn.active {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: white;
+    }
+
+    .fiscal-group {
+      background: var(--bg-tertiary);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin: 1rem 0 1.2rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .region-selector {
+      margin-bottom: 1rem;
+    }
+
+    .inline-select {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .inline-select label {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    select {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 60px;
+      padding: 0.5rem 1.2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .metric {
+      background: var(--bg-tertiary);
+      border-radius: 1rem;
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .metric-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent-green);
+      line-height: 1.2;
+    }
+
+    .metric-value.negative {
+      color: var(--accent-red);
+    }
+
+    .metric-sublabel {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      margin-top: 0.4rem;
+    }
+
+    .breakdown {
+      background: var(--bg-tertiary);
+      border-radius: 1rem;
+      padding: 1.2rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    .breakdown-row:last-child {
+      border-bottom: none;
+    }
+
+    .breakdown-label {
+      color: var(--text-secondary);
+    }
+
+    .breakdown-label.bold {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .breakdown-value.negative {
+      color: var(--accent-red);
+    }
+
+    .breakdown-value.positive {
+      color: var(--accent-green);
+    }
+
+    .chart-bar {
+      height: 10px;
+      border-radius: 12px;
+      display: flex;
+      overflow: hidden;
+      background: var(--bg-tertiary);
+      margin: 1rem 0 0.75rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .segment-net {
+      background: linear-gradient(90deg, #0b8f6e, #2bbd9e);
+    }
+    .segment-ss {
+      background: linear-gradient(90deg, #a3a8b0, #c1c6d0);
+    }
+    .segment-irpf {
+      background: linear-gradient(90deg, #ec8c49, #f5a97f);
+    }
+    body.dark-mode .segment-ss {
+      background: linear-gradient(90deg, #6c727d, #8e95a3);
+    }
+    body.dark-mode .segment-irpf {
+      background: linear-gradient(90deg, #d97846, #f5a97f);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.75rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    .paycheck-breakdown {
+      margin-top: 1.2rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 0.9rem;
+      padding: 1rem;
+    }
+
+    .paycheck-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .paycheck-item {
+      padding: 0.5rem;
+    }
+
+    .paycheck-item-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 0.4rem;
+    }
+
+    .paycheck-item-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .paycheck-item-value.negative {
+      color: var(--accent-red);
+    }
+
+    .paycheck-item-value.positive {
+      color: var(--accent-green);
+    }
+
+    .note {
+      background: var(--bg-tertiary);
+      border-left: 4px solid var(--accent-blue);
+      padding: 1rem 1.2rem;
+      border-radius: 0.9rem;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-top: 2rem;
+    }
+
+    .header-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .page-notes {
+      display: grid;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .page-notes .note {
+      margin-top: 0;
+    }
+
+    .note-warning {
+      border-left-color: var(--accent-orange);
+    }
+
+    .note-info {
+      border-left-color: var(--accent-blue);
+    }
+
+    .inline-gap {
+      margin-top: 12px;
+    }
+
+    .helper-text {
+      margin-top: 8px;
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+    }
+
+    .deduction-rows:empty {
+      display: none;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-tertiary);
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 1.25rem; }
+      h1 { font-size: 1.8rem; }
+      .calculators.compare-mode { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: 1fr; }
+      .paycheck-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+      .calculator { padding: 1.3rem; }
+      .salary-display { font-size: 2rem; }
+      .theme-switch { position: static; margin-bottom: 1rem; justify-content: center; display: inline-flex; width: auto; }
+      header { display: flex; flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body class="dark-mode">
+  <div class="container">
+    <header>
+      <div class="header-toolbar">
+        <button type="button" class="theme-switch" id="themeToggle" aria-pressed="true">
+          🌓 <span id="themeText">Modo claro</span>
+        </button>
+      </div>
+      <h1>
+        <span class="title-emoji">💰</span>
+        <span class="title-text">Calculadora Salario Neto</span>
+      </h1>
+      <p class="subtitle">España 2026 · IRPF + Cotizaciones SS</p>
+      <div class="repo-link">
+        <a href="https://github.com/JuanJesusAlejoSillero/calculadora-neto" target="_blank" rel="noreferrer noopener">📂 Repositorio del proyecto en GitHub</a>
+      </div>
+      <div class="mode-selector">
+        <button type="button" class="mode-btn active" data-mode="single" aria-pressed="true">📊 Calcular</button>
+        <button type="button" class="mode-btn" data-mode="compare" aria-pressed="false">⚖️ Comparar salarios</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="calculators single-mode" id="calculatorsContainer" aria-label="Escenarios de cálculo"></section>
+
+      <section class="page-notes" aria-label="Notas fiscales y legales">
+        <aside class="note">
+          <strong>📋 Fiscalidad 2026 · IRPF por comunidades autónomas</strong><br>
+          • <strong>Régimen Común</strong>: Andalucía, Aragón, Asturias, Baleares, Canarias, Cantabria, Castilla-La Mancha, Castilla y León, Cataluña, C. Valenciana, Extremadura, Galicia, La Rioja, Madrid, Murcia, Ceuta, Melilla.<br>
+          • <strong>Navarra (Régimen Foral)</strong>: escala propia; en esta calculadora se aproxima con una escala específica.<br>
+          • <strong>País Vasco (Régimen Foral)</strong>: Bizkaia, Gipuzkoa y Araba gestionan su propio IRPF; aquí se aplica una escala agregada.<br>
+          • <strong>Mínimos por descendientes</strong>: 2.400€ (1º), 2.700€ (2º), 4.000€ (3º), 4.500€ (4º+).<br>
+          • <strong>Reducción por rendimientos del trabajo</strong> (art. 20): se aplica sobre el rendimiento neto del trabajo en salarios bajos.<br>
+          • <strong>Deducción para rentas bajas (SMI 2026)</strong>: hasta 590,89€ en cuota para salarios hasta 17.094€, decreciente hasta 20.048,45€ y limitada por la cuota disponible.<br>
+          • <strong>Edad del contribuyente</strong>: A partir de 65 años se añaden 1.150€ al mínimo personal; desde 75 años, 8.100€ total (5.550€ + 2.550€).<br>
+          • La cotización a la SS del trabajador es del 6,5% con base máxima 58.914€ anuales.
+        </aside>
+
+        <aside class="note note-warning">
+          <strong>⚠️ Descargo de responsabilidad:</strong> Los resultados son <strong>meramente orientativos</strong> y <strong>no constituyen asesoramiento fiscal</strong>. Esta herramienta no sustituye a un gestor o asesor fiscal profesional. Las normativas pueden cambiar y cada caso personal (ingresos del cónyuge, discapacidad, deducciones autonómicas específicas, etc.) puede alterar significativamente el resultado real. <strong>Consulta siempre con un profesional antes de tomar decisiones económicas.</strong>
+        </aside>
+
+        <aside class="note note-info">
+          <strong>🧮 La fiscalidad es un tema complejo y esta herramienta podría contener errores</strong> derivados de mi falta de conocimientos en el ámbito. El repositorio es público, por lo que <strong>te animo a enviar mejoras</strong> a través de una <a href="https://github.com/JuanJesusAlejoSillero/calculadora-neto/pulls" target="_blank" rel="noreferrer noopener">pull request</a> o dejando una <a href="https://github.com/JuanJesusAlejoSillero/calculadora-neto/issues" target="_blank" rel="noreferrer noopener">issue</a> con el problema encontrado. <strong>¡Muchas gracias!</strong>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ============================================================
+    // TIPOS IMPOSITIVOS POR TERRITORIO (Escala general IRPF 2026)
+    // Base liquidable general: suma de tipos Estatal + Autonómico
+    // ============================================================
+    const STATE_BRACKETS = [
+      { min: 0, max: 12450, rate: 0.095 },
+      { min: 12450, max: 20200, rate: 0.12 },
+      { min: 20200, max: 35200, rate: 0.15 },
+      { min: 35200, max: 60000, rate: 0.185 },
+      { min: 60000, max: 300000, rate: 0.225 },
+      { min: 300000, max: Infinity, rate: 0.245 }
+    ];
+
+    // Escalas autonómicas (tipo autonómico por tramo)
+    const AUTONOMIC_SCALES = {
+      // RÉGIMEN COMÚN (CCAA que usan la escala estándar sin desviaciones agresivas)
+      // Nota: La mayoría siguen la escala autonómica por defecto (9.5%/12%/15%/18.5%/22.5%/22.5%)
+      // pero algunas tienen leves variaciones en los límites de tramo. Para simplificar y ser precisos,
+      // utilizamos la tabla oficial publicada por la AEAT para 2026 en territorio común.
+      "comun": [
+        { min: 0, max: 12450, rate: 0.095 },
+        { min: 12450, max: 20200, rate: 0.12 },
+        { min: 20200, max: 35200, rate: 0.15 },
+        { min: 35200, max: 60000, rate: 0.185 },
+        { min: 60000, max: 300000, rate: 0.225 },
+        { min: 300000, max: Infinity, rate: 0.225 } // último tramo igual
+      ],
+      // NAVARRA
+      "navarra": [
+        { min: 0, max: 12450, rate: 0.09 },
+        { min: 12450, max: 20200, rate: 0.11 },
+        { min: 20200, max: 35200, rate: 0.13 },
+        { min: 35200, max: 60000, rate: 0.16 },
+        { min: 60000, max: 120000, rate: 0.20 },
+        { min: 120000, max: Infinity, rate: 0.24 }
+      ],
+      // PAÍS VASCO (media armonizada de Bizkaia, Gipuzkoa, Araba) - escalas deflactadas
+      "euskadi": [
+        { min: 0, max: 12450, rate: 0.09 },
+        { min: 12450, max: 20200, rate: 0.115 },
+        { min: 20200, max: 35200, rate: 0.14 },
+        { min: 35200, max: 60000, rate: 0.18 },
+        { min: 60000, max: 300000, rate: 0.22 },
+        { min: 300000, max: Infinity, rate: 0.24 }
+      ]
+    };
+
+    // Constantes generales
+    const SS_RATE = 0.065;
+    const SS_MAX_ANUAL = 58914;
+    const GASTOS_DEDUCIBLES = 2000;
+    const MINIMO_PERSONAL_BASE = 5550;
+    const REDUCCION_TRABAJO_TRAMO1 = 14852;
+    const REDUCCION_TRABAJO_TRAMO2 = 17673.52;
+    const REDUCCION_TRABAJO_TRAMO3 = 19747.5;
+    const REDUCCION_TRABAJO_MAX = 7302;
+    const REDUCCION_TRABAJO_BASE_TRAMO3 = 2364.34;
+    const DEDUCCION_SMI_2026_MAX = 590.89;
+    const DEDUCCION_SMI_2026_TRAMO1 = 17094;
+    const DEDUCCION_SMI_2026_TRAMO2 = 20048.45;
+
+    // Art. 20 LIRPF. El umbral se calcula sobre el rendimiento neto antes de restar
+    // los 2.000 EUR generales del art. 19.2.f.
+    function reduccionRendimientosTrabajo(rendimientoNetoParaReduccion) {
+      if (rendimientoNetoParaReduccion <= REDUCCION_TRABAJO_TRAMO1) {
+        return REDUCCION_TRABAJO_MAX;
+      }
+
+      if (rendimientoNetoParaReduccion <= REDUCCION_TRABAJO_TRAMO2) {
+        return Math.max(
+          0,
+          REDUCCION_TRABAJO_MAX - 1.75 * (rendimientoNetoParaReduccion - REDUCCION_TRABAJO_TRAMO1)
+        );
+      }
+
+      if (rendimientoNetoParaReduccion <= REDUCCION_TRABAJO_TRAMO3) {
+        return Math.max(
+          0,
+          REDUCCION_TRABAJO_BASE_TRAMO3 - 1.14 * (rendimientoNetoParaReduccion - REDUCCION_TRABAJO_TRAMO2)
+        );
+      }
+
+      return 0;
+    }
+
+    // Disposición adicional sexagésima primera LIRPF, redacción 2026.
+    function deduccionRentasBajas2026(brutoAnual) {
+      if (brutoAnual <= DEDUCCION_SMI_2026_TRAMO1) {
+        return DEDUCCION_SMI_2026_MAX;
+      }
+
+      if (brutoAnual <= DEDUCCION_SMI_2026_TRAMO2) {
+        return Math.max(
+          0,
+          DEDUCCION_SMI_2026_MAX - 0.2 * (brutoAnual - DEDUCCION_SMI_2026_TRAMO1)
+        );
+      }
+
+      return 0;
+    }
+
+    // Mínimos por descendientes según número de hijos
+    function minimoPorDescendientes(hijos) {
+      if (hijos === 0) return 0;
+      const tabla = [0, 2400, 2700, 4000, 4500];
+      let total = 0;
+      for (let i = 1; i <= Math.min(hijos, 4); i++) total += tabla[i];
+      if (hijos > 4) total += (hijos - 4) * 4500;
+      return total;
+    }
+
+    // Mínimo por edad (basado en rangos)
+    function minimoPorEdad(rangoEdad) {
+      if (rangoEdad === "75+") return 8100;   // 5.550 + 2.550
+      if (rangoEdad === "65-74") return 6700; // 5.550 + 1.150
+      return MINIMO_PERSONAL_BASE;             // menor de 65
+    }
+
+    function calcularCuotaProgresiva(baseLiquidable, tramos) {
+      if (baseLiquidable <= 0) return 0;
+
+      let total = 0;
+      for (let i = 0; i < tramos.length; i++) {
+        const tramo = tramos[i];
+        const prevMax = i === 0 ? 0 : tramos[i - 1].max;
+        const inicioTramo = Math.max(tramo.min, prevMax);
+        if (baseLiquidable <= inicioTramo) break;
+
+        const limite = Math.min(baseLiquidable, tramo.max);
+        const baseTramo = limite - inicioTramo;
+        if (baseTramo > 0) total += baseTramo * tramo.rate;
+      }
+
+      return total;
+    }
+
+    // Cálculo de IRPF según escala autonómica elegida
+    function calcularIRPF(baseLiquidable, escalaKey) {
+      const escala = AUTONOMIC_SCALES[escalaKey] || AUTONOMIC_SCALES["comun"];
+      const cuotaEstatal = calcularCuotaProgresiva(baseLiquidable, STATE_BRACKETS);
+      const cuotaAutonomica = calcularCuotaProgresiva(baseLiquidable, escala);
+      return cuotaEstatal + cuotaAutonomica;
+    }
+
+    function calcularCuotaTrasMinimo(baseLiquidable, minimoPersonalFamiliar, escalaKey) {
+      const cuotaAntesMinimo = calcularIRPF(baseLiquidable, escalaKey);
+      const efectoMinimo = calcularIRPF(Math.min(baseLiquidable, minimoPersonalFamiliar), escalaKey);
+
+      return {
+        cuotaAntesMinimo,
+        efectoMinimo,
+        cuotaTrasMinimo: Math.max(0, cuotaAntesMinimo - efectoMinimo)
+      };
+    }
+
+    // Función principal de cálculo
+    function calcularSalario(bruto, hijos = 0, territorio = "comun", rangoEdad = "menor65") {
+      if (!bruto || bruto <= 0) {
+        return {
+          g: 0,
+          ss: 0,
+          tax: 0,
+          net: 0,
+          eff: 0,
+          tr: 0,
+          np: 0,
+          sp: 0,
+          ip: 0,
+          reduccionTrabajo: 0,
+          minimoPersonalFamiliar: 0,
+          efectoMinimo: 0,
+          cuotaAntesMinimo: 0,
+          cuotaTrasMinimo: 0,
+          deduccionRentasBajas: 0
+        };
+      }
+
+      const ss = Math.min(bruto, SS_MAX_ANUAL) * SS_RATE;
+      const rendimientoNetoPrevio = Math.max(0, bruto - ss - GASTOS_DEDUCIBLES);
+      const rendimientoNetoParaReduccion = Math.max(0, bruto - ss);
+      const reduccionTrabajo = Math.min(
+        rendimientoNetoPrevio,
+        reduccionRendimientosTrabajo(rendimientoNetoParaReduccion)
+      );
+      
+      const minimoDesc = minimoPorDescendientes(hijos);
+      const minimoEdad = minimoPorEdad(rangoEdad);
+      const minimoPersonalFamiliar = minimoEdad + minimoDesc;
+      
+      const baseLiquidable = Math.max(0, rendimientoNetoPrevio - reduccionTrabajo);
+      const { cuotaAntesMinimo, efectoMinimo, cuotaTrasMinimo } = calcularCuotaTrasMinimo(
+        baseLiquidable,
+        minimoPersonalFamiliar,
+        territorio
+      );
+      
+      const deduccionRentasBajas = Math.min(
+        cuotaTrasMinimo,
+        deduccionRentasBajas2026(bruto)
+      );
+      const tax = Math.max(0, cuotaTrasMinimo - deduccionRentasBajas);
+      
+      const neto = bruto - ss - tax;
+      const efectivaTotal = (ss + tax) / bruto;
+      const tipoMedioIrpf = tax / bruto;
+      
+      return {
+        g: bruto,
+        ss: ss,
+        tax: tax,
+        net: neto,
+        eff: efectivaTotal,
+        tr: tipoMedioIrpf,
+        np: neto / bruto,
+        sp: ss / bruto,
+        ip: tax / bruto,
+        reduccionTrabajo,
+        minimoPersonalFamiliar,
+        efectoMinimo,
+        cuotaAntesMinimo,
+        cuotaTrasMinimo,
+        deduccionRentasBajas
+      };
+    }
+
+    // Formateadores
+    function fmt(n) { return Math.round(n).toLocaleString('es-ES') + ' €'; }
+    function pct(n) { return ((n || 0) * 100).toFixed(1) + '%'; }
+
+    function clampSalary(value) {
+      return Math.min(300000, Math.max(0, Number(value) || 0));
+    }
+
+    function renderDeductionRows(data) {
+      const rows = [];
+
+      if (data.reduccionTrabajo > 0) {
+        rows.push(`<div class="breakdown-row"><span class="breakdown-label">Reducción rend. trabajo (art. 20)</span><span class="breakdown-value positive">− ${fmt(data.reduccionTrabajo)}</span></div>`);
+      }
+
+      if (data.efectoMinimo > 0) {
+        rows.push(`<div class="breakdown-row"><span class="breakdown-label">Efecto mínimo personal y familiar</span><span class="breakdown-value positive">− ${fmt(data.efectoMinimo)}</span></div>`);
+      }
+
+      if (data.deduccionRentasBajas > 0) {
+        rows.push(`<div class="breakdown-row"><span class="breakdown-label">Deducción rentas bajas 2026</span><span class="breakdown-value positive">− ${fmt(data.deduccionRentasBajas)}</span></div>`);
+      }
+
+      return rows.join('');
+    }
+
+    // Estado global
+    let currentMode = 'single';
+    let calculators = {
+      calc1: { bruto: 32400, pagas: 14, hijos: 0, territorio: "comun", rangoEdad: "menor65" },
+      calc2: { bruto: 41600, pagas: 14, hijos: 0, territorio: "comun", rangoEdad: "menor65" }
+    };
+
+    // Renderizado de cada calculadora
+    function renderCalculator(calcId) {
+      const state = calculators[calcId];
+      const data = calcularSalario(state.bruto, state.hijos, state.territorio, state.rangoEdad);
+      const nm = data.net / state.pagas;
+      const gm = data.g / state.pagas;
+      const dm = (data.ss + data.tax) / state.pagas;
+      const calcTitle = calcId === 'calc1' ? '📊 Escenario 1' : '⚖️ Escenario 2';
+      const salaryRangeId = `${calcId}-salary-range`;
+      const salaryInputId = `${calcId}-salary-input`;
+      const territorySelectId = `${calcId}-territory`;
+      const childrenSelectId = `${calcId}-children`;
+      const ageSelectId = `${calcId}-age`;
+
+      return `
+        <div class="calculator" data-calc="${calcId}">
+          <div class="calc-title">${calcTitle}</div>
+          
+          <div class="section">
+            <label class="label" for="${salaryRangeId}">Salario bruto anual</label>
+            <div class="salary-display" aria-live="polite">${fmt(state.bruto)}</div>
+            <input id="${salaryRangeId}" type="range" min="0" max="300000" step="100" value="${state.bruto}" class="salary-range" data-calc="${calcId}" aria-describedby="${calcId}-salary-limits">
+            <div class="range-limits" id="${calcId}-salary-limits"><span>0 €</span><span>300.000 €</span></div>
+            <div class="input-row">
+              <label for="${salaryInputId}">O introduce el importe:</label>
+              <input id="${salaryInputId}" type="number" min="0" max="300000" step="100" value="${state.bruto}" class="salary-input" data-calc="${calcId}" inputmode="numeric">
+              <span>€</span>
+            </div>
+          </div>
+
+          <div class="fiscal-group">
+            <div class="region-selector inline-select">
+              <label for="${territorySelectId}">📍 Comunidad / Régimen fiscal:</label>
+              <select id="${territorySelectId}" class="territorio-select" data-calc="${calcId}">
+                <option value="comun" ${state.territorio === 'comun' ? 'selected' : ''}>🏛️ Régimen Común</option>
+                <option value="navarra" ${state.territorio === 'navarra' ? 'selected' : ''}>🌿 Navarra (Foral)</option>
+                <option value="euskadi" ${state.territorio === 'euskadi' ? 'selected' : ''}>⛰️ País Vasco (Foral)</option>
+              </select>
+            </div>
+            <div class="inline-select inline-gap">
+              <label for="${childrenSelectId}">👶 Número de hijos (menores de 25):</label>
+              <select id="${childrenSelectId}" class="children-select" data-calc="${calcId}">
+                ${[0,1,2,3,4,5].map(n => `<option value="${n}" ${state.hijos === n ? 'selected' : ''}>${n} ${n === 1 ? 'hijo' : 'hijos'}</option>`).join('')}
+              </select>
+            </div>
+            <div class="inline-select inline-gap">
+              <label for="${ageSelectId}">🎂 Edad del contribuyente:</label>
+              <select id="${ageSelectId}" class="age-select" data-calc="${calcId}">
+                <option value="menor65" ${state.rangoEdad === 'menor65' ? 'selected' : ''}>Menor de 65 años</option>
+                <option value="65-74" ${state.rangoEdad === '65-74' ? 'selected' : ''}>De 65 a 74 años</option>
+                <option value="75+" ${state.rangoEdad === '75+' ? 'selected' : ''}>75 años o más</option>
+              </select>
+            </div>
+            <div class="inline-select helper-text">
+              💡 A partir de 65 años se añaden 1.150€ al mínimo personal. A partir de 75 años el mínimo total es 8.100€.
+            </div>
+          </div>
+
+          <div class="section">
+            <label class="label">Número de pagas</label>
+            <div class="paycheck-buttons">
+              ${[12,13,14,15,16].map(p => `<button type="button" class="paycheck-btn ${state.pagas === p ? 'active' : ''}" data-pagas="${p}" data-calc="${calcId}" aria-pressed="${state.pagas === p ? 'true' : 'false'}">${p} pagas</button>`).join('')}
+            </div>
+          </div>
+
+          <div class="metrics">
+            <div class="metric"><div class="metric-label">Neto anual</div><div class="metric-value metric-net">${fmt(data.net)}</div><div class="metric-sublabel metric-net-label">${pct(data.np)} del bruto</div></div>
+            <div class="metric"><div class="metric-label">Neto por paga</div><div class="metric-value metric-netpay">${fmt(nm)}</div><div class="metric-sublabel metric-netpay-label">${state.pagas} pagas al año</div></div>
+            <div class="metric"><div class="metric-label">Tipo efectivo IRPF</div><div class="metric-value metric-irpf negative">${pct(data.tr)}</div><div class="metric-sublabel metric-irpf-label">${fmt(data.tax)} al año</div></div>
+            <div class="metric"><div class="metric-label">Carga total</div><div class="metric-value metric-total negative">${pct(data.eff)}</div><div class="metric-sublabel">IRPF + SS</div></div>
+          </div>
+
+          <div class="breakdown">
+            <div class="breakdown-row"><span class="breakdown-label">Salario bruto anual</span><span class="breakdown-value breakdown-g">${fmt(data.g)}</span></div>
+            <div class="breakdown-row"><span class="breakdown-label">Cotización SS</span><span class="breakdown-value negative breakdown-ss">− ${fmt(data.ss)} (${pct(data.sp)})</span></div>
+            <div class="breakdown-row"><span class="breakdown-label">IRPF final estimado</span><span class="breakdown-value negative breakdown-tax">− ${fmt(data.tax)} (${pct(data.ip)})</span></div>
+            <div class="deduction-rows">${renderDeductionRows(data)}</div>
+            <div class="breakdown-row"><span class="breakdown-label bold">Salario neto anual</span><span class="breakdown-value positive breakdown-net">${fmt(data.net)}</span></div>
+          </div>
+
+          <div class="chart-bar">
+            <div class="chart-segment segment-net" style="width: ${(data.np * 100).toFixed(1)}%"></div>
+            <div class="chart-segment segment-ss" style="width: ${(data.sp * 100).toFixed(1)}%"></div>
+            <div class="chart-segment segment-irpf" style="width: ${(data.ip * 100).toFixed(1)}%"></div>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><span class="legend-dot segment-net"></span>Neto ${pct(data.np)}</div>
+            <div class="legend-item"><span class="legend-dot segment-ss"></span>SS ${pct(data.sp)}</div>
+            <div class="legend-item"><span class="legend-dot segment-irpf"></span>IRPF ${pct(data.ip)}</div>
+          </div>
+
+          <div class="paycheck-breakdown">
+            <label class="label">Desglose por paga (${state.pagas} pagas al año)</label>
+            <div class="paycheck-grid">
+              <div class="paycheck-item"><div class="paycheck-item-label">Bruto por paga</div><div class="paycheck-item-value paycheck-gm">${fmt(gm)}</div></div>
+              <div class="paycheck-item"><div class="paycheck-item-label">Deducciones</div><div class="paycheck-item-value negative">− <span class="paycheck-dm">${fmt(dm)}</span></div></div>
+              <div class="paycheck-item"><div class="paycheck-item-label">Neto por paga</div><div class="paycheck-item-value positive"><span class="paycheck-nm">${fmt(nm)}</span></div></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateCalculatorUI(calcId) {
+      const state = calculators[calcId];
+      const data = calcularSalario(state.bruto, state.hijos, state.territorio, state.rangoEdad);
+      const nm = data.net / state.pagas;
+      const gm = data.g / state.pagas;
+      const dm = (data.ss + data.tax) / state.pagas;
+      const calcDiv = document.querySelector(`.calculator[data-calc="${calcId}"]`);
+      if (!calcDiv) return;
+      
+      calcDiv.querySelector('.salary-display').textContent = fmt(state.bruto);
+      const salaryInput = calcDiv.querySelector('.salary-input');
+      if (salaryInput) salaryInput.value = state.bruto;
+      const rangeInput = calcDiv.querySelector('.salary-range');
+      if (rangeInput) rangeInput.value = state.bruto;
+      
+      calcDiv.querySelector('.metric-net').textContent = fmt(data.net);
+      calcDiv.querySelector('.metric-net-label').textContent = pct(data.np) + ' del bruto';
+      calcDiv.querySelector('.metric-netpay').textContent = fmt(nm);
+      calcDiv.querySelector('.metric-netpay-label').textContent = `${state.pagas} pagas al año`;
+      calcDiv.querySelector('.metric-irpf').textContent = pct(data.tr);
+      calcDiv.querySelector('.metric-irpf-label').textContent = `${fmt(data.tax)} al año`;
+      calcDiv.querySelector('.metric-total').textContent = pct(data.eff);
+      calcDiv.querySelector('.breakdown-g').textContent = fmt(data.g);
+      calcDiv.querySelector('.breakdown-ss').innerHTML = `− ${fmt(data.ss)} (${pct(data.sp)})`;
+      calcDiv.querySelector('.breakdown-tax').innerHTML = `− ${fmt(data.tax)} (${pct(data.ip)})`;
+      calcDiv.querySelector('.deduction-rows').innerHTML = renderDeductionRows(data);
+      calcDiv.querySelector('.breakdown-net').textContent = fmt(data.net);
+      calcDiv.querySelector('.chart-segment.segment-net').style.width = `${(data.np * 100).toFixed(1)}%`;
+      calcDiv.querySelector('.chart-segment.segment-ss').style.width = `${(data.sp * 100).toFixed(1)}%`;
+      calcDiv.querySelector('.chart-segment.segment-irpf').style.width = `${(data.ip * 100).toFixed(1)}%`;
+      const legend = calcDiv.querySelectorAll('.legend-item');
+      if (legend.length >= 3) {
+        legend[0].innerHTML = `<span class="legend-dot segment-net"></span>Neto ${pct(data.np)}`;
+        legend[1].innerHTML = `<span class="legend-dot segment-ss"></span>SS ${pct(data.sp)}`;
+        legend[2].innerHTML = `<span class="legend-dot segment-irpf"></span>IRPF ${pct(data.ip)}`;
+      }
+      calcDiv.querySelector('.paycheck-gm').textContent = fmt(gm);
+      calcDiv.querySelector('.paycheck-dm').textContent = fmt(dm);
+      calcDiv.querySelector('.paycheck-nm').textContent = fmt(nm);
+    }
+
+    function renderCalculators() {
+      const container = document.getElementById('calculatorsContainer');
+      container.innerHTML = renderCalculator('calc1') + (currentMode === 'compare' ? renderCalculator('calc2') : '');
+      container.classList.remove('single-mode', 'compare-mode');
+      container.classList.add(currentMode === 'single' ? 'single-mode' : 'compare-mode');
+      attachEventListeners();
+    }
+
+    function attachEventListeners() {
+      document.querySelectorAll('.salary-range').forEach(el => {
+        el.addEventListener('input', function() {
+          calculators[this.dataset.calc].bruto = +this.value;
+          updateCalculatorUI(this.dataset.calc);
+        });
+      });
+      document.querySelectorAll('.salary-input').forEach(el => {
+        el.addEventListener('input', function() {
+          const v = clampSalary(this.value);
+          calculators[this.dataset.calc].bruto = v;
+          const calcDiv = this.closest('.calculator');
+          if (calcDiv) calcDiv.querySelector('.salary-range').value = v;
+          updateCalculatorUI(this.dataset.calc);
+        });
+      });
+      document.querySelectorAll('.paycheck-btn').forEach(el => {
+        el.addEventListener('click', function() {
+          calculators[this.dataset.calc].pagas = +this.dataset.pagas;
+          renderCalculators();
+        });
+      });
+      document.querySelectorAll('.territorio-select').forEach(sel => {
+        sel.addEventListener('change', function() {
+          calculators[this.dataset.calc].territorio = this.value;
+          updateCalculatorUI(this.dataset.calc);
+        });
+      });
+      document.querySelectorAll('.children-select').forEach(sel => {
+        sel.addEventListener('change', function() {
+          calculators[this.dataset.calc].hijos = parseInt(this.value, 10);
+          updateCalculatorUI(this.dataset.calc);
+        });
+      });
+      document.querySelectorAll('.age-select').forEach(sel => {
+        sel.addEventListener('change', function() {
+          calculators[this.dataset.calc].rangoEdad = this.value;
+          updateCalculatorUI(this.dataset.calc);
+        });
+      });
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.mode-btn').forEach(b => {
+            const isActive = b === this;
+            b.classList.toggle('active', isActive);
+            b.setAttribute('aria-pressed', String(isActive));
+          });
+          currentMode = this.dataset.mode;
+          renderCalculators();
+        });
+      });
+    }
+
+    // Toggle tema oscuro/claro
+    const themeToggle = document.getElementById('themeToggle');
+    const themeTextSpan = document.getElementById('themeText');
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeTextSpan.innerText = 'Modo claro';
+        themeToggle.setAttribute('aria-pressed', 'true');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.body.classList.remove('dark-mode');
+        themeTextSpan.innerText = 'Modo oscuro';
+        themeToggle.setAttribute('aria-pressed', 'false');
+        localStorage.setItem('theme', 'light');
+      }
+    }
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') setTheme('light');
+    else setTheme('dark');
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.body.classList.contains('dark-mode');
+      setTheme(isDark ? 'light' : 'dark');
+    });
+
+    renderCalculators();
+  </script>
+</body>
+</html>
