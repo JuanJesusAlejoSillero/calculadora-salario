@@ -20,9 +20,9 @@ Los resultados proporcionados por la herramienta son **meramente orientativos** 
 
 ## 🚀 Uso
 
-1. Descarga el archivo [calculadora_neto.html](calculadora_neto.html) y ábrelo en tu navegador, o visita la versión alojada en mi servidor:
+1. Descarga el archivo [calculadora_salario.html](calculadora_salario.html) y ábrelo en tu navegador, o visita la versión alojada en mi servidor:
 
-   [https://sh.juanje.net/neto](https://sh.juanje.net/neto)
+   [https://sh.juanje.net/salario](https://sh.juanje.net/salario)
 
 2. Elige el modo de entrada con el selector superior: `bruto anual` o `neto mensual`.
 3. Ajusta el salario bruto anual o el neto mensual.
@@ -67,7 +67,7 @@ El resultado mostrado es una estimación orientativa del neto anual, del neto po
 
 Originalmente hice esta herramienta para uso privado pero creo que puede ser de utilidad a otros, por eso decidí publicarla.
 
-Si detectas un problema o quieres proponer una mejora, te animo a abrir una [pull request](https://github.com/JuanJesusAlejoSillero/calculadora-neto/pulls) con los cambios que harías o una [issue](https://github.com/JuanJesusAlejoSillero/calculadora-neto/issues) con el problema encontrado.
+Si detectas un problema o quieres proponer una mejora, te animo a abrir una [pull request](https://github.com/JuanJesusAlejoSillero/calculadora-salario/pulls) con los cambios que harías o una [issue](https://github.com/JuanJesusAlejoSillero/calculadora-salario/issues) con el problema encontrado.
 
 **¡Muchas gracias!**
 
