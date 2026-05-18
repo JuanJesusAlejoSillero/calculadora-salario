@@ -1,6 +1,6 @@
-# 💰 Calculadora Salario Neto España 2026
+# 💰 Calculadora Salario España 2026
 
-- [💰 Calculadora Salario Neto España 2026](#-calculadora-salario-neto-españa-2026)
+- [💰 Calculadora Salario España 2026](#-calculadora-salario-españa-2026)
   - [⚠️ Descargo de responsabilidad](#️-descargo-de-responsabilidad)
   - [🚀 Uso](#-uso)
   - [🧮 Características](#-características)
@@ -8,7 +8,7 @@
   - [🤝 Cómo contribuir](#-cómo-contribuir)
   - [📄 Licencia](#-licencia)
 
-Calculadora web para estimar el salario neto anual y por paga en España, con modo individual o comparativo entre varios escenarios.
+Calculadora web para estimar el salario bruto y neto anual y por paga en España, con modo individual o comparativo entre varios escenarios.
 
 La aplicación **funciona completamente offline y es 100% privada**: todos los cálculos se realizan en el lado del cliente, es decir, en tu navegador, sin enviar ni recibir datos de servidores externos.
 
@@ -24,9 +24,12 @@ Los resultados proporcionados por la herramienta son **meramente orientativos** 
 
    [https://sh.juanje.net/neto](https://sh.juanje.net/neto)
 
-2. Ajusta el salario bruto anual.
-3. Selecciona el territorio, número de hijos y rango de edad.
-4. Elige el número de pagas al año.
+2. Elige el modo de entrada con el selector superior: `bruto anual` o `neto mensual`.
+3. Ajusta el salario bruto anual o el neto mensual.
+4. Selecciona el territorio, número de hijos y rango de edad.
+5. Elige el número de pagas al año.
+
+En 12 pagas, el modo inverso interpreta la entrada como **neto mensual**. Si eliges 13, 14, 15 o 16 pagas, la entrada se interpreta como **neto por paga** para mantener la coherencia del cálculo anual.
 
 Si lo deseas, puedes activar el modo **Comparar salarios** para ver entre 2 y 10 situaciones diferentes lado a lado y ajustar el número de escenarios con los botones `+` y `−`.
 
@@ -35,6 +38,7 @@ Si lo deseas, puedes activar el modo **Comparar salarios** para ver entre 2 y 10
 ## 🧮 Características
 
 - Salario bruto anual ajustable entre 0 € y 300.000 €.
+- Cálculo inverso del bruto anual a partir del neto mensual o del neto por paga.
 - Cálculo en 12, 13, 14, 15 o 16 pagas.
 - Escala diferenciada según territorio.
 - Mínimos por descendientes para 0 a 5 hijos.
@@ -55,6 +59,7 @@ La calculadora aplica un modelo simplificado:
 - El mínimo personal y familiar no se resta de la base sin más: se calcula la cuota completa y se descuenta el efecto del mínimo en cuota, como hace la LIRPF.
 - Cuota IRPF calculada como suma de la escala estatal y la escala autonómica o foral seleccionada.
 - Deducción adicional en cuota para rentas bajas en 2026: 590,89 € hasta 17.094 € y reducción lineal hasta 20.048,45 €.
+- Cuando partes de un neto mensual, el bruto anual se estima con una búsqueda binaria sobre la misma función `IRPF + Seguridad Social` que usa el cálculo directo, evitando desajustes entre ambos modos.
 
 El resultado mostrado es una estimación orientativa del neto anual, del neto por paga y de los porcentajes efectivos de cotización e IRPF.
 

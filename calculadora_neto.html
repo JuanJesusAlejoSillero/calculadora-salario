@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Calculadora Salario Neto · España 2026</title>
+  <title>Calculadora Salario · España 2026</title>
   <script>
     (function() {
       const storageKey = 'theme';
@@ -138,10 +138,7 @@
       border-bottom-color: #d97706;
     }
 
-    .theme-switch {
-      position: absolute;
-      top: 0;
-      right: 0;
+    .toolbar-switch {
       background: var(--bg-tertiary);
       border: 1px solid var(--border-color);
       border-radius: 40px;
@@ -157,10 +154,63 @@
       font-family: inherit;
       color: inherit;
     }
-    .theme-switch:hover {
+    .toolbar-switch:hover {
       background: var(--accent-blue);
       color: white;
       border-color: var(--accent-blue);
+    }
+
+    .toolbar-switch[aria-pressed="true"] {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+      background: rgba(108, 71, 255, 0.08);
+    }
+
+    .toolbar-switch:hover[aria-pressed="true"] {
+      color: white;
+      background: var(--accent-blue);
+    }
+
+    .salary-mode-selector {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem;
+      border: 1px solid var(--border-color);
+      border-radius: 40px;
+      background: var(--bg-secondary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .salary-mode-btn {
+      border: 0;
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .salary-mode-btn:hover {
+      color: var(--accent-blue);
+      background: rgba(108, 71, 255, 0.1);
+    }
+
+    .salary-mode-btn.active,
+    .salary-mode-btn[aria-pressed="true"] {
+      background: var(--accent-blue);
+      color: white;
+      box-shadow: 0 2px 6px rgba(108, 71, 255, 0.25);
+    }
+
+    .salary-mode-btn:hover[aria-pressed="true"] {
+      color: white;
+      background: var(--accent-blue-hover);
     }
 
     .mode-selector {
@@ -367,6 +417,30 @@
       gap: 0.75rem;
       margin-top: 1rem;
       flex-wrap: wrap;
+    }
+
+    .input-mode-result {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 0.9rem;
+      padding: 0.85rem 1rem;
+      border-radius: 0.85rem;
+      border: 1px solid rgba(108, 71, 255, 0.18);
+      background: rgba(108, 71, 255, 0.08);
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+    }
+
+    .input-mode-result[hidden] {
+      display: none;
+    }
+
+    .input-mode-result strong {
+      color: var(--accent-blue);
+      font-size: 1rem;
+      white-space: nowrap;
     }
 
     input[type="number"] {
@@ -640,6 +714,8 @@
     .header-toolbar {
       display: flex;
       justify-content: flex-end;
+      gap: 0.75rem;
+      flex-wrap: wrap;
       width: 100%;
       margin-bottom: 1rem;
     }
@@ -693,8 +769,12 @@
       .paycheck-grid { grid-template-columns: 1fr; gap: 0.75rem; }
       .calculator { padding: 1.3rem; }
       .salary-display { font-size: 2rem; }
-      .theme-switch { position: static; margin-bottom: 1rem; justify-content: center; display: inline-flex; width: auto; }
+      .toolbar-switch { justify-content: center; display: inline-flex; width: auto; }
+      .salary-mode-selector { width: auto; max-width: 100%; }
+      .input-mode-result { flex-direction: column; align-items: flex-start; }
+      .input-mode-result strong { white-space: normal; }
       header { display: flex; flex-direction: column; align-items: center; }
+      .header-toolbar { justify-content: center; }
     }
   </style>
 </head>
@@ -702,13 +782,17 @@
   <div class="container">
     <header>
       <div class="header-toolbar">
-        <button type="button" class="theme-switch" id="themeToggle" aria-pressed="true">
+        <div class="salary-mode-selector" role="group" aria-label="Modo de entrada salarial">
+          <button type="button" class="salary-mode-btn active" data-salary-mode="gross" aria-pressed="true">💶 Bruto anual</button>
+          <button type="button" class="salary-mode-btn" data-salary-mode="net" aria-pressed="false">💱 Neto mensual</button>
+        </div>
+        <button type="button" class="toolbar-switch" id="themeToggle" aria-pressed="true">
           🌓 <span id="themeText">Modo claro</span>
         </button>
       </div>
       <h1>
         <span class="title-emoji">💰</span>
-        <span class="title-text">Calculadora Salario Neto</span>
+        <span class="title-text">Calculadora Salario</span>
       </h1>
       <p class="subtitle">España 2026 · IRPF + Cotizaciones SS</p>
       <div class="repo-link">
@@ -1180,10 +1264,42 @@
 
     // Formateadores
     function fmt(n) { return Math.round(n).toLocaleString('es-ES') + ' €'; }
+    function fmtPlain(n) { return Math.round(n).toLocaleString('es-ES'); }
     function pct(n) { return ((n || 0) * 100).toFixed(1) + '%'; }
 
-    function clampSalary(value) {
-      return Math.min(300000, Math.max(0, Number(value) || 0));
+    const BASE_GROSS_RANGE_MAX = 300000;
+    const MAX_SUPPORTED_GROSS = 1500000;
+    const GROSS_INPUT_STEP = 100;
+    const NET_TARGET_INPUT_STEP = 1;
+    const MIN_COMPARE_CALCULATORS = 2;
+    const MAX_COMPARE_CALCULATORS = 10;
+
+    function roundToStep(value, step) {
+      return Math.round((Number(value) || 0) / step) * step;
+    }
+
+    function roundUpToStep(value, step) {
+      return Math.ceil((Number(value) || 0) / step) * step;
+    }
+
+    function clampAnnualGross(value, max = MAX_SUPPORTED_GROSS) {
+      return Math.min(max, Math.max(0, Number(value) || 0));
+    }
+
+    function getAnnualGrossInputMax(grossValue = 0) {
+      const normalizedGross = clampAnnualGross(grossValue);
+      return Math.min(
+        MAX_SUPPORTED_GROSS,
+        Math.max(BASE_GROSS_RANGE_MAX, roundUpToStep(normalizedGross, 50000) || BASE_GROSS_RANGE_MAX)
+      );
+    }
+
+    function getNetTargetSectionLabel(pagas) {
+      return pagas === 12 ? 'Neto mensual objetivo' : 'Neto por paga objetivo';
+    }
+
+    function getNetTargetInputLabel(pagas) {
+      return pagas === 12 ? 'O introduce el neto mensual:' : 'O introduce el neto por paga:';
     }
 
     function renderDeductionRows(data) {
@@ -1216,9 +1332,139 @@
       `).join('');
     }
 
-    // Estado global
-    const MIN_COMPARE_CALCULATORS = 2;
-    const MAX_COMPARE_CALCULATORS = 10;
+    function calculateDataForState(state) {
+      return calcularSalario(state.bruto, state.hijos, state.territorio, state.rangoEdad);
+    }
+
+    function getMaxNetTargetPerPay(state) {
+      const maxData = calcularSalario(MAX_SUPPORTED_GROSS, state.hijos, state.territorio, state.rangoEdad);
+      return Math.max(0, Math.floor(maxData.net / state.pagas));
+    }
+
+    function clampNetTargetPerPay(value, state) {
+      return Math.min(getMaxNetTargetPerPay(state), Math.max(0, Number(value) || 0));
+    }
+
+    function estimateGrossFromNetTarget(targetNetPerPay, state) {
+      const targetAnnualNet = Math.max(0, Number(targetNetPerPay) || 0) * state.pagas;
+
+      if (targetAnnualNet <= 0) {
+        return 0;
+      }
+
+      let low = 0;
+      let high = Math.min(
+        MAX_SUPPORTED_GROSS,
+        Math.max(BASE_GROSS_RANGE_MAX, roundUpToStep(targetAnnualNet, GROSS_INPUT_STEP))
+      );
+      let highNet = calcularSalario(high, state.hijos, state.territorio, state.rangoEdad).net;
+
+      while (high < MAX_SUPPORTED_GROSS && highNet < targetAnnualNet) {
+        low = high;
+        high = Math.min(MAX_SUPPORTED_GROSS, high * 2);
+        highNet = calcularSalario(high, state.hijos, state.territorio, state.rangoEdad).net;
+      }
+
+      let bestGross = high;
+      let bestDiff = Math.abs(highNet - targetAnnualNet);
+
+      for (let iteration = 0; iteration < 40; iteration += 1) {
+        const mid = (low + high) / 2;
+        const midNet = calcularSalario(mid, state.hijos, state.territorio, state.rangoEdad).net;
+        const midDiff = Math.abs(midNet - targetAnnualNet);
+
+        if (midDiff < bestDiff) {
+          bestDiff = midDiff;
+          bestGross = mid;
+        }
+
+        if (midNet < targetAnnualNet) {
+          low = mid;
+        } else {
+          high = mid;
+        }
+      }
+
+      const candidateGrosses = Array.from(new Set([
+        clampAnnualGross(roundToStep(low, GROSS_INPUT_STEP)),
+        clampAnnualGross(roundToStep(high, GROSS_INPUT_STEP)),
+        clampAnnualGross(roundToStep(bestGross, GROSS_INPUT_STEP)),
+        clampAnnualGross(Math.floor(bestGross / GROSS_INPUT_STEP) * GROSS_INPUT_STEP),
+        clampAnnualGross(Math.ceil(bestGross / GROSS_INPUT_STEP) * GROSS_INPUT_STEP)
+      ]));
+
+      let closestGross = candidateGrosses[0] || 0;
+      let closestDiff = Infinity;
+
+      candidateGrosses.forEach((candidateGross) => {
+        const candidateNet = calcularSalario(candidateGross, state.hijos, state.territorio, state.rangoEdad).net;
+        const candidateDiff = Math.abs(candidateNet - targetAnnualNet);
+
+        if (candidateDiff < closestDiff) {
+          closestDiff = candidateDiff;
+          closestGross = candidateGross;
+        }
+      });
+
+      return closestGross;
+    }
+
+    function syncNetTargetFromGross(state) {
+      state.bruto = clampAnnualGross(state.bruto);
+      const data = calculateDataForState(state);
+      state.netoObjetivoPaga = clampNetTargetPerPay(
+        roundToStep(data.net / state.pagas, NET_TARGET_INPUT_STEP),
+        state
+      );
+      return data;
+    }
+
+    function syncGrossFromNetTarget(state) {
+      state.netoObjetivoPaga = clampNetTargetPerPay(
+        roundToStep(state.netoObjetivoPaga, NET_TARGET_INPUT_STEP),
+        state
+      );
+      state.bruto = estimateGrossFromNetTarget(state.netoObjetivoPaga, state);
+      return calculateDataForState(state);
+    }
+
+    function getSalaryInputConfig(state, data, salaryInputMode) {
+      if (salaryInputMode === 'net') {
+        const maxTarget = getMaxNetTargetPerPay(state);
+
+        return {
+          sectionLabel: getNetTargetSectionLabel(state.pagas),
+          displayValue: fmt(state.netoObjetivoPaga),
+          rangeValue: state.netoObjetivoPaga,
+          rangeMax: maxTarget,
+          rangeStep: NET_TARGET_INPUT_STEP,
+          inputValue: state.netoObjetivoPaga,
+          inputStep: NET_TARGET_INPUT_STEP,
+          inputMax: maxTarget,
+          inputLabel: getNetTargetInputLabel(state.pagas),
+          rangeMaxLabel: `${fmtPlain(maxTarget)} €`,
+          showEstimate: true,
+          estimateValue: fmt(data.g)
+        };
+      }
+
+      const grossMax = getAnnualGrossInputMax(state.bruto);
+
+      return {
+        sectionLabel: 'Salario bruto anual',
+        displayValue: fmt(state.bruto),
+        rangeValue: state.bruto,
+        rangeMax: grossMax,
+        rangeStep: GROSS_INPUT_STEP,
+        inputValue: state.bruto,
+        inputStep: GROSS_INPUT_STEP,
+        inputMax: grossMax,
+        inputLabel: 'O introduce el importe:',
+        rangeMaxLabel: `${fmtPlain(grossMax)} €`,
+        showEstimate: false,
+        estimateValue: fmt(data.g)
+      };
+    }
 
     function createCalculatorState(overrides = {}) {
       return {
@@ -1227,24 +1473,43 @@
         hijos: 0,
         territorio: 'andalucia',
         rangoEdad: 'menor65',
+        netoObjetivoPaga: 0,
         ...overrides
       };
     }
 
     let currentMode = 'single';
+    let salaryInputMode = 'gross';
     let compareCalculatorCount = MIN_COMPARE_CALCULATORS;
     let calculators = [
       createCalculatorState({ bruto: 32400, pagas: 12, territorio: 'andalucia' }),
       createCalculatorState({ bruto: 41600, pagas: 14, territorio: 'castilla_mancha' })
     ];
 
+    calculators.forEach((state) => {
+      syncNetTargetFromGross(state);
+    });
+
     function ensureCalculator(calcIndex) {
       if (!calculators[calcIndex]) {
         const previousState = calculators[calcIndex - 1] ? { ...calculators[calcIndex - 1] } : {};
-        calculators[calcIndex] = createCalculatorState(previousState);
+        const nextState = createCalculatorState(previousState);
+
+        if (!Number.isFinite(nextState.netoObjetivoPaga) || nextState.netoObjetivoPaga < 0) {
+          syncNetTargetFromGross(nextState);
+        }
+
+        calculators[calcIndex] = nextState;
       }
 
       return calculators[calcIndex];
+    }
+
+    function recalculateCalculator(calcIndex) {
+      const state = ensureCalculator(calcIndex);
+      return salaryInputMode === 'net'
+        ? syncGrossFromNetTarget(state)
+        : syncNetTargetFromGross(state);
     }
 
     function getVisibleCalculatorCount() {
@@ -1280,8 +1545,9 @@
     // Renderizado de cada calculadora
     function renderCalculator(calcIndex) {
       const state = ensureCalculator(calcIndex);
+      const data = recalculateCalculator(calcIndex);
       const calcId = `calc${calcIndex + 1}`;
-      const data = calcularSalario(state.bruto, state.hijos, state.territorio, state.rangoEdad);
+      const salaryInputConfig = getSalaryInputConfig(state, data, salaryInputMode);
       const nm = data.net / state.pagas;
       const gm = data.g / state.pagas;
       const dm = (data.ss + data.tax) / state.pagas;
@@ -1297,14 +1563,18 @@
           <div class="calc-title">${calcTitle}</div>
           
           <div class="section">
-            <label class="label" for="${salaryRangeId}">Salario bruto anual</label>
-            <div class="salary-display" aria-live="polite">${fmt(state.bruto)}</div>
-            <input id="${salaryRangeId}" type="range" min="0" max="300000" step="100" value="${state.bruto}" class="salary-range" data-calc-index="${calcIndex}" aria-describedby="${calcId}-salary-limits">
-            <div class="range-limits" id="${calcId}-salary-limits"><span>0 €</span><span>300.000 €</span></div>
+            <label class="label salary-section-label" for="${salaryRangeId}">${salaryInputConfig.sectionLabel}</label>
+            <div class="salary-display" aria-live="polite">${salaryInputConfig.displayValue}</div>
+            <input id="${salaryRangeId}" type="range" min="0" max="${salaryInputConfig.rangeMax}" step="${salaryInputConfig.rangeStep}" value="${salaryInputConfig.rangeValue}" class="salary-range" data-calc-index="${calcIndex}" aria-describedby="${calcId}-salary-limits">
+            <div class="range-limits" id="${calcId}-salary-limits"><span class="range-limit-start">0 €</span><span class="range-limit-end">${salaryInputConfig.rangeMaxLabel}</span></div>
             <div class="input-row">
-              <label for="${salaryInputId}">O introduce el importe:</label>
-              <input id="${salaryInputId}" type="number" min="0" max="300000" step="100" value="${state.bruto}" class="salary-input" data-calc-index="${calcIndex}" inputmode="numeric">
+              <label class="salary-input-label" for="${salaryInputId}">${salaryInputConfig.inputLabel}</label>
+              <input id="${salaryInputId}" type="number" min="0" max="${salaryInputConfig.inputMax}" step="${salaryInputConfig.inputStep}" value="${salaryInputConfig.inputValue}" class="salary-input" data-calc-index="${calcIndex}" inputmode="numeric">
               <span>€</span>
+            </div>
+            <div class="input-mode-result" ${salaryInputConfig.showEstimate ? '' : 'hidden'}>
+              <span>Bruto anual estimado</span>
+              <strong class="input-mode-result-value">${salaryInputConfig.estimateValue}</strong>
             </div>
           </div>
 
@@ -1381,18 +1651,35 @@
 
     function updateCalculatorUI(calcIndex) {
       const state = ensureCalculator(calcIndex);
-      const data = calcularSalario(state.bruto, state.hijos, state.territorio, state.rangoEdad);
+      const data = recalculateCalculator(calcIndex);
+      const salaryInputConfig = getSalaryInputConfig(state, data, salaryInputMode);
       const nm = data.net / state.pagas;
       const gm = data.g / state.pagas;
       const dm = (data.ss + data.tax) / state.pagas;
       const calcDiv = document.querySelector(`.calculator[data-calc-index="${calcIndex}"]`);
       if (!calcDiv) return;
       
-      calcDiv.querySelector('.salary-display').textContent = fmt(state.bruto);
+      calcDiv.querySelector('.salary-section-label').textContent = salaryInputConfig.sectionLabel;
+      calcDiv.querySelector('.salary-display').textContent = salaryInputConfig.displayValue;
       const salaryInput = calcDiv.querySelector('.salary-input');
-      if (salaryInput) salaryInput.value = state.bruto;
+      if (salaryInput) {
+        salaryInput.value = salaryInputConfig.inputValue;
+        salaryInput.max = salaryInputConfig.inputMax;
+        salaryInput.step = salaryInputConfig.inputStep;
+      }
       const rangeInput = calcDiv.querySelector('.salary-range');
-      if (rangeInput) rangeInput.value = state.bruto;
+      if (rangeInput) {
+        rangeInput.value = salaryInputConfig.rangeValue;
+        rangeInput.max = salaryInputConfig.rangeMax;
+        rangeInput.step = salaryInputConfig.rangeStep;
+      }
+      calcDiv.querySelector('.salary-input-label').textContent = salaryInputConfig.inputLabel;
+      calcDiv.querySelector('.range-limit-end').textContent = salaryInputConfig.rangeMaxLabel;
+      const inputModeResult = calcDiv.querySelector('.input-mode-result');
+      if (inputModeResult) {
+        inputModeResult.hidden = !salaryInputConfig.showEstimate;
+        inputModeResult.querySelector('.input-mode-result-value').textContent = salaryInputConfig.estimateValue;
+      }
       
       calcDiv.querySelector('.metric-net').textContent = fmt(data.net);
       calcDiv.querySelector('.metric-net-label').textContent = pct(data.np) + ' del bruto';
@@ -1434,17 +1721,28 @@
       document.querySelectorAll('.salary-range').forEach(el => {
         el.addEventListener('input', function() {
           const calcIndex = Number(this.dataset.calcIndex);
-          calculators[calcIndex].bruto = +this.value;
+          const state = ensureCalculator(calcIndex);
+
+          if (salaryInputMode === 'net') {
+            state.netoObjetivoPaga = clampNetTargetPerPay(this.value, state);
+          } else {
+            state.bruto = clampAnnualGross(this.value);
+          }
+
           updateCalculatorUI(calcIndex);
         });
       });
       document.querySelectorAll('.salary-input').forEach(el => {
         el.addEventListener('input', function() {
           const calcIndex = Number(this.dataset.calcIndex);
-          const v = clampSalary(this.value);
-          calculators[calcIndex].bruto = v;
-          const calcDiv = this.closest('.calculator');
-          if (calcDiv) calcDiv.querySelector('.salary-range').value = v;
+          const state = ensureCalculator(calcIndex);
+
+          if (salaryInputMode === 'net') {
+            state.netoObjetivoPaga = clampNetTargetPerPay(this.value, state);
+          } else {
+            state.bruto = clampAnnualGross(this.value);
+          }
+
           updateCalculatorUI(calcIndex);
         });
       });
@@ -1479,10 +1777,39 @@
     }
 
     // Toggle tema oscuro/claro
+    const salaryModeButtons = Array.from(document.querySelectorAll('.salary-mode-btn'));
+    const salaryInputModeStorageKey = 'salaryInputMode';
     const themeToggle = document.getElementById('themeToggle');
     const themeTextSpan = document.getElementById('themeText');
     const themeStorageKey = 'theme';
     const systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function resolveSalaryInputMode() {
+      const savedMode = localStorage.getItem(salaryInputModeStorageKey);
+
+      return savedMode === 'net' ? 'net' : 'gross';
+    }
+
+    function updateSalaryModeSelector(mode) {
+      salaryModeButtons.forEach((button) => {
+        const isActive = button.dataset.salaryMode === mode;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+    }
+
+    function applySalaryInputMode(mode, persistPreference = true, rerender = true) {
+      salaryInputMode = mode === 'net' ? 'net' : 'gross';
+      updateSalaryModeSelector(salaryInputMode);
+
+      if (persistPreference) {
+        localStorage.setItem(salaryInputModeStorageKey, salaryInputMode);
+      }
+
+      if (rerender) {
+        renderCalculators();
+      }
+    }
 
     function resolveTheme() {
       const savedTheme = localStorage.getItem(themeStorageKey);
@@ -1530,6 +1857,12 @@
       applyTheme(isDark ? 'light' : 'dark');
     });
 
+    salaryModeButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        applySalaryInputMode(button.dataset.salaryMode);
+      });
+    });
+
     document.querySelectorAll('.mode-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         document.querySelectorAll('.mode-btn').forEach(button => {
@@ -1551,6 +1884,7 @@
       setCompareCalculatorCount(compareCalculatorCount - 1);
     });
 
+    applySalaryInputMode(resolveSalaryInputMode(), false, false);
     renderCalculators();
   </script>
 </body>
