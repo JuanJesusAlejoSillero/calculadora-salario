@@ -8,7 +8,7 @@
   - [🤝 Cómo contribuir](#-cómo-contribuir)
   - [📄 Licencia](#-licencia)
 
-Calculadora web para estimar el salario neto anual y por paga en España.
+Calculadora web para estimar el salario neto anual y por paga en España, con modo individual o comparativo entre varios escenarios.
 
 La aplicación **funciona completamente offline y es 100% privada**: todos los cálculos se realizan en el lado del cliente, es decir, en tu navegador, sin enviar ni recibir datos de servidores externos.
 
@@ -28,7 +28,7 @@ Los resultados proporcionados por la herramienta son **meramente orientativos** 
 3. Selecciona el territorio, número de hijos y rango de edad.
 4. Elige el número de pagas al año.
 
-Si lo deseas, puedes activar el modo **Comparar salarios** para ver dos situaciones diferentes lado a lado.
+Si lo deseas, puedes activar el modo **Comparar salarios** para ver entre 2 y 10 situaciones diferentes lado a lado y ajustar el número de escenarios con los botones `+` y `−`.
 
 [![Vista previa de la calculadora](img/screenshot.png)](img/screenshot-fullpage.png)
 
@@ -41,7 +41,7 @@ Si lo deseas, puedes activar el modo **Comparar salarios** para ver dos situacio
 - Ajuste del mínimo personal por edad del contribuyente.
 - Deducción por obtención de rendimientos del trabajo.
 - Deducción adicional para rentas bajas vinculada al SMI 2026.
-- Modo comparación para evaluar dos escenarios simultáneos.
+- Modo comparación para evaluar entre 2 y 10 escenarios simultáneos.
 - Tema oscuro y claro y detección automática del modo preferido en la primera visita.
 - Funcionamiento completamente offline, sin necesidad de conexión a Internet.
 

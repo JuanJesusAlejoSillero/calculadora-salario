@@ -171,6 +171,73 @@
       flex-wrap: wrap;
     }
 
+    .compare-controls {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      background: var(--bg-secondary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .compare-controls[hidden] {
+      display: none;
+    }
+
+    .compare-controls-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .compare-controls-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .compare-count-btn {
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 999px;
+      border: 1.5px solid var(--border-color);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .compare-count-btn:hover:not(:disabled) {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+      transform: translateY(-1px);
+    }
+
+    .compare-count-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .compare-count-display {
+      min-width: 8.5rem;
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
     .mode-btn {
       padding: 0.6rem 1.4rem;
       border: 1.5px solid var(--border-color);
@@ -650,6 +717,14 @@
       <div class="mode-selector">
         <button type="button" class="mode-btn active" data-mode="single" aria-pressed="true">📊 Calcular</button>
         <button type="button" class="mode-btn" data-mode="compare" aria-pressed="false">⚖️ Comparar salarios</button>
+      </div>
+      <div class="compare-controls" id="compareControls" aria-label="Control de calculadoras en comparación" hidden>
+        <span class="compare-controls-label">Calculadoras activas</span>
+        <div class="compare-controls-actions">
+          <button type="button" class="compare-count-btn" id="removeCalculatorBtn" aria-label="Quitar una calculadora">−</button>
+          <output class="compare-count-display" id="calculatorCountDisplay" for="removeCalculatorBtn addCalculatorBtn" aria-live="polite">2 calculadoras</output>
+          <button type="button" class="compare-count-btn" id="addCalculatorBtn" aria-label="Añadir una calculadora">+</button>
+        </div>
       </div>
     </header>
 
@@ -1142,20 +1217,75 @@
     }
 
     // Estado global
+    const MIN_COMPARE_CALCULATORS = 2;
+    const MAX_COMPARE_CALCULATORS = 10;
+
+    function createCalculatorState(overrides = {}) {
+      return {
+        bruto: 32400,
+        pagas: 12,
+        hijos: 0,
+        territorio: 'andalucia',
+        rangoEdad: 'menor65',
+        ...overrides
+      };
+    }
+
     let currentMode = 'single';
-    let calculators = {
-      calc1: { bruto: 32400, pagas: 12, hijos: 0, territorio: "andalucia", rangoEdad: "menor65" },
-      calc2: { bruto: 41600, pagas: 14, hijos: 0, territorio: "castilla_mancha", rangoEdad: "menor65" }
-    };
+    let compareCalculatorCount = MIN_COMPARE_CALCULATORS;
+    let calculators = [
+      createCalculatorState({ bruto: 32400, pagas: 12, territorio: 'andalucia' }),
+      createCalculatorState({ bruto: 41600, pagas: 14, territorio: 'castilla_mancha' })
+    ];
+
+    function ensureCalculator(calcIndex) {
+      if (!calculators[calcIndex]) {
+        const previousState = calculators[calcIndex - 1] ? { ...calculators[calcIndex - 1] } : {};
+        calculators[calcIndex] = createCalculatorState(previousState);
+      }
+
+      return calculators[calcIndex];
+    }
+
+    function getVisibleCalculatorCount() {
+      return currentMode === 'compare' ? compareCalculatorCount : 1;
+    }
+
+    function updateCompareControls() {
+      const compareControls = document.getElementById('compareControls');
+      const countDisplay = document.getElementById('calculatorCountDisplay');
+      const addButton = document.getElementById('addCalculatorBtn');
+      const removeButton = document.getElementById('removeCalculatorBtn');
+      const isCompareMode = currentMode === 'compare';
+
+      compareControls.hidden = !isCompareMode;
+      compareControls.setAttribute('aria-hidden', String(!isCompareMode));
+      countDisplay.textContent = `${compareCalculatorCount} calculadoras`;
+      addButton.disabled = compareCalculatorCount >= MAX_COMPARE_CALCULATORS;
+      removeButton.disabled = compareCalculatorCount <= MIN_COMPARE_CALCULATORS;
+    }
+
+    function setCompareCalculatorCount(nextCount) {
+      const clampedCount = Math.max(MIN_COMPARE_CALCULATORS, Math.min(MAX_COMPARE_CALCULATORS, nextCount));
+
+      if (clampedCount === compareCalculatorCount) {
+        updateCompareControls();
+        return;
+      }
+
+      compareCalculatorCount = clampedCount;
+      renderCalculators();
+    }
 
     // Renderizado de cada calculadora
-    function renderCalculator(calcId) {
-      const state = calculators[calcId];
+    function renderCalculator(calcIndex) {
+      const state = ensureCalculator(calcIndex);
+      const calcId = `calc${calcIndex + 1}`;
       const data = calcularSalario(state.bruto, state.hijos, state.territorio, state.rangoEdad);
       const nm = data.net / state.pagas;
       const gm = data.g / state.pagas;
       const dm = (data.ss + data.tax) / state.pagas;
-      const calcTitle = calcId === 'calc1' ? '📊 Escenario 1' : '⚖️ Escenario 2';
+      const calcTitle = `📊 Escenario ${calcIndex + 1}`;
       const salaryRangeId = `${calcId}-salary-range`;
       const salaryInputId = `${calcId}-salary-input`;
       const territorySelectId = `${calcId}-territory`;
@@ -1163,17 +1293,17 @@
       const ageSelectId = `${calcId}-age`;
 
       return `
-        <div class="calculator" data-calc="${calcId}">
+        <div class="calculator" data-calc-index="${calcIndex}">
           <div class="calc-title">${calcTitle}</div>
           
           <div class="section">
             <label class="label" for="${salaryRangeId}">Salario bruto anual</label>
             <div class="salary-display" aria-live="polite">${fmt(state.bruto)}</div>
-            <input id="${salaryRangeId}" type="range" min="0" max="300000" step="100" value="${state.bruto}" class="salary-range" data-calc="${calcId}" aria-describedby="${calcId}-salary-limits">
+            <input id="${salaryRangeId}" type="range" min="0" max="300000" step="100" value="${state.bruto}" class="salary-range" data-calc-index="${calcIndex}" aria-describedby="${calcId}-salary-limits">
             <div class="range-limits" id="${calcId}-salary-limits"><span>0 €</span><span>300.000 €</span></div>
             <div class="input-row">
               <label for="${salaryInputId}">O introduce el importe:</label>
-              <input id="${salaryInputId}" type="number" min="0" max="300000" step="100" value="${state.bruto}" class="salary-input" data-calc="${calcId}" inputmode="numeric">
+              <input id="${salaryInputId}" type="number" min="0" max="300000" step="100" value="${state.bruto}" class="salary-input" data-calc-index="${calcIndex}" inputmode="numeric">
               <span>€</span>
             </div>
           </div>
@@ -1181,19 +1311,19 @@
           <div class="fiscal-group">
             <div class="region-selector inline-select">
               <label for="${territorySelectId}">📍 Comunidad / Régimen fiscal:</label>
-              <select id="${territorySelectId}" class="territorio-select" data-calc="${calcId}">
+              <select id="${territorySelectId}" class="territorio-select" data-calc-index="${calcIndex}">
                 ${renderTerritoryOptions(state.territorio)}
               </select>
             </div>
             <div class="inline-select inline-gap">
               <label for="${childrenSelectId}">👶 Número de hijos (menores de 25):</label>
-              <select id="${childrenSelectId}" class="children-select" data-calc="${calcId}">
+              <select id="${childrenSelectId}" class="children-select" data-calc-index="${calcIndex}">
                 ${[0,1,2,3,4,5].map(n => `<option value="${n}" ${state.hijos === n ? 'selected' : ''}>${n} ${n === 1 ? 'hijo' : 'hijos'}</option>`).join('')}
               </select>
             </div>
             <div class="inline-select inline-gap">
               <label for="${ageSelectId}">🎂 Edad del contribuyente:</label>
-              <select id="${ageSelectId}" class="age-select" data-calc="${calcId}">
+              <select id="${ageSelectId}" class="age-select" data-calc-index="${calcIndex}">
                 <option value="menor65" ${state.rangoEdad === 'menor65' ? 'selected' : ''}>Menor de 65 años</option>
                 <option value="65-74" ${state.rangoEdad === '65-74' ? 'selected' : ''}>De 65 a 74 años</option>
                 <option value="75+" ${state.rangoEdad === '75+' ? 'selected' : ''}>75 años o más</option>
@@ -1207,7 +1337,7 @@
           <div class="section">
             <label class="label">Número de pagas</label>
             <div class="paycheck-buttons">
-              ${[12,13,14,15,16].map(p => `<button type="button" class="paycheck-btn ${state.pagas === p ? 'active' : ''}" data-pagas="${p}" data-calc="${calcId}" aria-pressed="${state.pagas === p ? 'true' : 'false'}">${p} pagas</button>`).join('')}
+              ${[12,13,14,15,16].map(p => `<button type="button" class="paycheck-btn ${state.pagas === p ? 'active' : ''}" data-pagas="${p}" data-calc-index="${calcIndex}" aria-pressed="${state.pagas === p ? 'true' : 'false'}">${p} pagas</button>`).join('')}
             </div>
           </div>
 
@@ -1249,13 +1379,13 @@
       `;
     }
 
-    function updateCalculatorUI(calcId) {
-      const state = calculators[calcId];
+    function updateCalculatorUI(calcIndex) {
+      const state = ensureCalculator(calcIndex);
       const data = calcularSalario(state.bruto, state.hijos, state.territorio, state.rangoEdad);
       const nm = data.net / state.pagas;
       const gm = data.g / state.pagas;
       const dm = (data.ss + data.tax) / state.pagas;
-      const calcDiv = document.querySelector(`.calculator[data-calc="${calcId}"]`);
+      const calcDiv = document.querySelector(`.calculator[data-calc-index="${calcIndex}"]`);
       if (!calcDiv) return;
       
       calcDiv.querySelector('.salary-display').textContent = fmt(state.bruto);
@@ -1292,61 +1422,58 @@
 
     function renderCalculators() {
       const container = document.getElementById('calculatorsContainer');
-      container.innerHTML = renderCalculator('calc1') + (currentMode === 'compare' ? renderCalculator('calc2') : '');
+      const visibleCount = getVisibleCalculatorCount();
+      container.innerHTML = Array.from({ length: visibleCount }, (_, calcIndex) => renderCalculator(calcIndex)).join('');
       container.classList.remove('single-mode', 'compare-mode');
       container.classList.add(currentMode === 'single' ? 'single-mode' : 'compare-mode');
+      updateCompareControls();
       attachEventListeners();
     }
 
     function attachEventListeners() {
       document.querySelectorAll('.salary-range').forEach(el => {
         el.addEventListener('input', function() {
-          calculators[this.dataset.calc].bruto = +this.value;
-          updateCalculatorUI(this.dataset.calc);
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].bruto = +this.value;
+          updateCalculatorUI(calcIndex);
         });
       });
       document.querySelectorAll('.salary-input').forEach(el => {
         el.addEventListener('input', function() {
+          const calcIndex = Number(this.dataset.calcIndex);
           const v = clampSalary(this.value);
-          calculators[this.dataset.calc].bruto = v;
+          calculators[calcIndex].bruto = v;
           const calcDiv = this.closest('.calculator');
           if (calcDiv) calcDiv.querySelector('.salary-range').value = v;
-          updateCalculatorUI(this.dataset.calc);
+          updateCalculatorUI(calcIndex);
         });
       });
       document.querySelectorAll('.paycheck-btn').forEach(el => {
         el.addEventListener('click', function() {
-          calculators[this.dataset.calc].pagas = +this.dataset.pagas;
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].pagas = +this.dataset.pagas;
           renderCalculators();
         });
       });
       document.querySelectorAll('.territorio-select').forEach(sel => {
         sel.addEventListener('change', function() {
-          calculators[this.dataset.calc].territorio = this.value;
-          updateCalculatorUI(this.dataset.calc);
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].territorio = this.value;
+          updateCalculatorUI(calcIndex);
         });
       });
       document.querySelectorAll('.children-select').forEach(sel => {
         sel.addEventListener('change', function() {
-          calculators[this.dataset.calc].hijos = parseInt(this.value, 10);
-          updateCalculatorUI(this.dataset.calc);
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].hijos = parseInt(this.value, 10);
+          updateCalculatorUI(calcIndex);
         });
       });
       document.querySelectorAll('.age-select').forEach(sel => {
         sel.addEventListener('change', function() {
-          calculators[this.dataset.calc].rangoEdad = this.value;
-          updateCalculatorUI(this.dataset.calc);
-        });
-      });
-      document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          document.querySelectorAll('.mode-btn').forEach(b => {
-            const isActive = b === this;
-            b.classList.toggle('active', isActive);
-            b.setAttribute('aria-pressed', String(isActive));
-          });
-          currentMode = this.dataset.mode;
-          renderCalculators();
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].rangoEdad = this.value;
+          updateCalculatorUI(calcIndex);
         });
       });
     }
@@ -1401,6 +1528,27 @@
     themeToggle.addEventListener('click', () => {
       const isDark = document.documentElement.classList.contains('dark-mode');
       applyTheme(isDark ? 'light' : 'dark');
+    });
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.mode-btn').forEach(button => {
+          const isActive = button === this;
+          button.classList.toggle('active', isActive);
+          button.setAttribute('aria-pressed', String(isActive));
+        });
+
+        currentMode = this.dataset.mode;
+        renderCalculators();
+      });
+    });
+
+    document.getElementById('addCalculatorBtn').addEventListener('click', () => {
+      setCompareCalculatorCount(compareCalculatorCount + 1);
+    });
+
+    document.getElementById('removeCalculatorBtn').addEventListener('click', () => {
+      setCompareCalculatorCount(compareCalculatorCount - 1);
     });
 
     renderCalculators();
