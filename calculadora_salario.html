@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>Calculadora Salario · España 2026</title>
   <script>
-    (function() {
+    (function () {
       const storageKey = 'theme';
       const storedTheme = localStorage.getItem(storageKey);
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -31,9 +32,9 @@
       --accent-green: #0b8f6e;
       --accent-red: #e35f5f;
       --accent-orange: #ec8c49;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,0.03), 0 1px 3px rgba(0,0,0,0.05);
-      --shadow-md: 0 4px 8px -2px rgba(0,0,0,0.04), 0 2px 4px -2px rgba(0,0,0,0.02);
-      --shadow-lg: 0 12px 20px -8px rgba(0,0,0,0.08);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
+      --shadow-lg: 0 12px 20px -8px rgba(0, 0, 0, 0.08);
     }
 
     html.dark-mode {
@@ -49,9 +50,9 @@
       --accent-green: #3dd0c7;
       --accent-red: #ff7d7d;
       --accent-orange: #ffb976;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.15);
-      --shadow-md: 0 4px 8px -2px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
-      --shadow-lg: 0 12px 20px -8px rgba(0,0,0,0.4);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.15);
+      --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 12px 20px -8px rgba(0, 0, 0, 0.4);
     }
 
     * {
@@ -60,7 +61,8 @@
       padding: 0;
     }
 
-    html, body {
+    html,
+    body {
       background-color: var(--bg-primary);
       color: var(--text-primary);
       font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
@@ -92,17 +94,20 @@
       gap: 0.5rem;
       flex-wrap: wrap;
     }
+
     .title-emoji {
       background: none;
       -webkit-text-fill-color: initial;
       color: inherit;
     }
+
     .title-text {
       background: linear-gradient(135deg, var(--accent-blue) 0%, #a07eff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
+
     .subtitle {
       color: var(--text-secondary);
       font-size: 1rem;
@@ -154,6 +159,7 @@
       font-family: inherit;
       color: inherit;
     }
+
     .toolbar-switch:hover {
       background: var(--accent-blue);
       color: white;
@@ -381,6 +387,7 @@
       border-radius: 5px;
       background: var(--bg-tertiary);
       outline: none;
+      appearance: none;
       -webkit-appearance: none;
       cursor: pointer;
     }
@@ -394,7 +401,7 @@
       background: var(--accent-blue);
       cursor: pointer;
       transition: transform 0.1s ease;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
       border: 2px solid white;
     }
 
@@ -625,15 +632,19 @@
     .segment-net {
       background: linear-gradient(90deg, #0b8f6e, #2bbd9e);
     }
+
     .segment-ss {
       background: linear-gradient(90deg, #a3a8b0, #c1c6d0);
     }
+
     .segment-irpf {
       background: linear-gradient(90deg, #ec8c49, #f5a97f);
     }
+
     html.dark-mode .segment-ss {
       background: linear-gradient(90deg, #6c727d, #8e95a3);
     }
+
     html.dark-mode .segment-irpf {
       background: linear-gradient(90deg, #d97846, #f5a97f);
     }
@@ -762,29 +773,75 @@
     }
 
     @media (max-width: 768px) {
-      .container { padding: 1.25rem; }
-      h1 { font-size: 1.8rem; }
-      .calculators.compare-mode { grid-template-columns: 1fr; }
-      .metrics { grid-template-columns: 1fr; }
-      .paycheck-grid { grid-template-columns: 1fr; gap: 0.75rem; }
-      .calculator { padding: 1.3rem; }
-      .salary-display { font-size: 2rem; }
-      .toolbar-switch { justify-content: center; display: inline-flex; width: auto; }
-      .salary-mode-selector { width: auto; max-width: 100%; }
-      .input-mode-result { flex-direction: column; align-items: flex-start; }
-      .input-mode-result strong { white-space: normal; }
-      header { display: flex; flex-direction: column; align-items: center; }
-      .header-toolbar { justify-content: center; }
+      .container {
+        padding: 1.25rem;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .calculators.compare-mode {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .paycheck-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .calculator {
+        padding: 1.3rem;
+      }
+
+      .salary-display {
+        font-size: 2rem;
+      }
+
+      .toolbar-switch {
+        justify-content: center;
+        display: inline-flex;
+        width: auto;
+      }
+
+      .salary-mode-selector {
+        width: auto;
+        max-width: 100%;
+      }
+
+      .input-mode-result {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .input-mode-result strong {
+        white-space: normal;
+      }
+
+      header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .header-toolbar {
+        justify-content: center;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <header>
       <div class="header-toolbar">
         <div class="salary-mode-selector" role="group" aria-label="Modo de entrada salarial">
           <button type="button" class="salary-mode-btn active" data-salary-mode="gross" aria-pressed="true">💶 Bruto anual</button>
-          <button type="button" class="salary-mode-btn" data-salary-mode="net" aria-pressed="false">💱 Neto mensual</button>
+          <button type="button" class="salary-mode-btn" data-salary-mode="net" aria-pressed="false">💱 Neto por paga</button>
         </div>
         <button type="button" class="toolbar-switch" id="themeToggle" aria-pressed="true">
           🌓 <span id="themeText">Modo claro</span>
@@ -792,7 +849,7 @@
       </div>
       <h1>
         <span class="title-emoji">💰</span>
-        <span class="title-text">Calculadora Salario</span>
+        <span class="title-text">Calculadora de Salario</span>
       </h1>
       <p class="subtitle">España 2026 · IRPF + Cotizaciones SS</p>
       <div class="repo-link">
@@ -1212,11 +1269,11 @@
         rendimientoNetoPrevio,
         reduccionRendimientosTrabajo(rendimientoNetoParaReduccion)
       );
-      
+
       const minimoDesc = minimoPorDescendientes(hijos);
       const minimoEdad = minimoPorEdad(rangoEdad);
       const minimoPersonalFamiliar = minimoEdad + minimoDesc;
-      
+
       const baseLiquidable = Math.max(0, rendimientoNetoPrevio - reduccionTrabajo);
       const { cuotaAntesMinimo, efectoMinimo, cuotaTrasMinimo } = calcularCuotaTrasMinimo(
         baseLiquidable,
@@ -1230,17 +1287,17 @@
         ? cuotaTrasMinimo * DEDUCCION_CEUTA_MELILLA_RATE
         : 0;
       const cuotaTrasDeduccionTerritorial = Math.max(0, cuotaTrasMinimo - deduccionCeutaMelilla);
-      
+
       const deduccionRentasBajas = Math.min(
         cuotaTrasDeduccionTerritorial,
         deduccionRentasBajas2026(bruto)
       );
       const tax = Math.max(0, cuotaTrasDeduccionTerritorial - deduccionRentasBajas);
-      
+
       const neto = bruto - ss - tax;
       const efectivaTotal = (ss + tax) / bruto;
       const tipoMedioIrpf = tax / bruto;
-      
+
       return {
         g: bruto,
         ss: ss,
@@ -1588,7 +1645,7 @@
             <div class="inline-select inline-gap">
               <label for="${childrenSelectId}">👶 Número de hijos (menores de 25):</label>
               <select id="${childrenSelectId}" class="children-select" data-calc-index="${calcIndex}">
-                ${[0,1,2,3,4,5].map(n => `<option value="${n}" ${state.hijos === n ? 'selected' : ''}>${n} ${n === 1 ? 'hijo' : 'hijos'}</option>`).join('')}
+                ${[0, 1, 2, 3, 4, 5].map(n => `<option value="${n}" ${state.hijos === n ? 'selected' : ''}>${n} ${n === 1 ? 'hijo' : 'hijos'}</option>`).join('')}
               </select>
             </div>
             <div class="inline-select inline-gap">
@@ -1607,7 +1664,7 @@
           <div class="section">
             <label class="label">Número de pagas</label>
             <div class="paycheck-buttons">
-              ${[12,13,14,15,16].map(p => `<button type="button" class="paycheck-btn ${state.pagas === p ? 'active' : ''}" data-pagas="${p}" data-calc-index="${calcIndex}" aria-pressed="${state.pagas === p ? 'true' : 'false'}">${p} pagas</button>`).join('')}
+              ${[12, 13, 14, 15, 16].map(p => `<button type="button" class="paycheck-btn ${state.pagas === p ? 'active' : ''}" data-pagas="${p}" data-calc-index="${calcIndex}" aria-pressed="${state.pagas === p ? 'true' : 'false'}">${p} pagas</button>`).join('')}
             </div>
           </div>
 
@@ -1639,6 +1696,7 @@
 
           <div class="paycheck-breakdown">
             <label class="label">Desglose por paga (${state.pagas} pagas al año)</label>
+            <div class="helper-text">Referencia anual media: las pagas extra pueden tener retenciones distintas.</div>
             <div class="paycheck-grid">
               <div class="paycheck-item"><div class="paycheck-item-label">Bruto por paga</div><div class="paycheck-item-value paycheck-gm">${fmt(gm)}</div></div>
               <div class="paycheck-item"><div class="paycheck-item-label">Deducciones</div><div class="paycheck-item-value negative">− <span class="paycheck-dm">${fmt(dm)}</span></div></div>
@@ -1658,7 +1716,7 @@
       const dm = (data.ss + data.tax) / state.pagas;
       const calcDiv = document.querySelector(`.calculator[data-calc-index="${calcIndex}"]`);
       if (!calcDiv) return;
-      
+
       calcDiv.querySelector('.salary-section-label').textContent = salaryInputConfig.sectionLabel;
       calcDiv.querySelector('.salary-display').textContent = salaryInputConfig.displayValue;
       const salaryInput = calcDiv.querySelector('.salary-input');
@@ -1680,7 +1738,7 @@
         inputModeResult.hidden = !salaryInputConfig.showEstimate;
         inputModeResult.querySelector('.input-mode-result-value').textContent = salaryInputConfig.estimateValue;
       }
-      
+
       calcDiv.querySelector('.metric-net').textContent = fmt(data.net);
       calcDiv.querySelector('.metric-net-label').textContent = pct(data.np) + ' del bruto';
       calcDiv.querySelector('.metric-netpay').textContent = fmt(nm);
@@ -1719,7 +1777,7 @@
 
     function attachEventListeners() {
       document.querySelectorAll('.salary-range').forEach(el => {
-        el.addEventListener('input', function() {
+        el.addEventListener('input', function () {
           const calcIndex = Number(this.dataset.calcIndex);
           const state = ensureCalculator(calcIndex);
 
@@ -1733,7 +1791,7 @@
         });
       });
       document.querySelectorAll('.salary-input').forEach(el => {
-        el.addEventListener('input', function() {
+        el.addEventListener('input', function () {
           const calcIndex = Number(this.dataset.calcIndex);
           const state = ensureCalculator(calcIndex);
 
@@ -1747,28 +1805,28 @@
         });
       });
       document.querySelectorAll('.paycheck-btn').forEach(el => {
-        el.addEventListener('click', function() {
+        el.addEventListener('click', function () {
           const calcIndex = Number(this.dataset.calcIndex);
           calculators[calcIndex].pagas = +this.dataset.pagas;
           renderCalculators();
         });
       });
       document.querySelectorAll('.territorio-select').forEach(sel => {
-        sel.addEventListener('change', function() {
+        sel.addEventListener('change', function () {
           const calcIndex = Number(this.dataset.calcIndex);
           calculators[calcIndex].territorio = this.value;
           updateCalculatorUI(calcIndex);
         });
       });
       document.querySelectorAll('.children-select').forEach(sel => {
-        sel.addEventListener('change', function() {
+        sel.addEventListener('change', function () {
           const calcIndex = Number(this.dataset.calcIndex);
           calculators[calcIndex].hijos = parseInt(this.value, 10);
           updateCalculatorUI(calcIndex);
         });
       });
       document.querySelectorAll('.age-select').forEach(sel => {
-        sel.addEventListener('change', function() {
+        sel.addEventListener('change', function () {
           const calcIndex = Number(this.dataset.calcIndex);
           calculators[calcIndex].rangoEdad = this.value;
           updateCalculatorUI(calcIndex);
@@ -1864,7 +1922,7 @@
     });
 
     document.querySelectorAll('.mode-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
+      btn.addEventListener('click', function () {
         document.querySelectorAll('.mode-btn').forEach(button => {
           const isActive = button === this;
           button.classList.toggle('active', isActive);
@@ -1888,4 +1946,5 @@
     renderCalculators();
   </script>
 </body>
+
 </html>
