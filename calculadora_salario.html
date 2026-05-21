@@ -549,7 +549,8 @@
     }
 
     select,
-    .children-exact-input {
+    .children-exact-input,
+    .company-atep-input {
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
       border-radius: 60px;
@@ -563,13 +564,25 @@
     }
 
     select:focus,
-    .children-exact-input:focus {
+    .children-exact-input:focus,
+    .company-atep-input:focus {
       outline: none;
       border-color: var(--accent-blue);
     }
 
     .children-exact-input {
       width: 6.5rem;
+    }
+
+    .inline-input-with-suffix {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .company-atep-input {
+      width: 6.75rem;
+      text-align: right;
     }
 
     .metrics {
@@ -617,6 +630,14 @@
       border-radius: 1rem;
       padding: 1.2rem;
       border: 1px solid var(--border-color);
+    }
+
+    .employer-cost-card {
+      margin-bottom: 1rem;
+    }
+
+    .employer-cost-card .breakdown-details:last-of-type {
+      border-bottom: none;
     }
 
     .breakdown-details {
@@ -720,6 +741,10 @@
 
     .breakdown-value.positive {
       color: var(--accent-green);
+    }
+
+    .breakdown-value.muted {
+      color: var(--text-tertiary);
     }
 
     .chart-bar {
@@ -1008,6 +1033,10 @@
           • <strong>Cotización del trabajador en Régimen General 2026</strong>: contingencias comunes 4,70%; desempleo
           1,55% en indefinidos y asimilados o 1,60% en temporales; formación profesional 0,10%; MEI 0,15%; y cuota de
           solidaridad si se supera la base máxima mensual de 5.101,20€.<br>
+          • <strong>Coste empresa estimado</strong>: se modelan las cuotas empresariales fijas del Régimen General 2026
+          (23,60% por contingencias comunes; desempleo 5,50% o 6,70% según contrato; FOGASA 0,20%; formación
+          profesional 0,60%; MEI 0,75%; y cuota de solidaridad si procede). La prima de accidentes de trabajo y
+          enfermedades profesionales depende de la actividad o del CNAE y no se incluye en esta versión.<br>
           • Los casos con cambio de residencia dentro del año o con rentas obtenidas fuera de Ceuta/Melilla no se
           prorratean en esta versión.<br>
           • <strong>Edad del contribuyente</strong>: A partir de 65 años se añaden 1.150€ al mínimo personal; desde 75
@@ -1308,10 +1337,23 @@
       training: 0.001,
       mei: 0.0015
     };
+    const SS_EMPLOYER_RATES = {
+      common: 0.236,
+      unemploymentIndefinite: 0.055,
+      unemploymentTemporary: 0.067,
+      fogasa: 0.002,
+      training: 0.006,
+      mei: 0.0075
+    };
     const SS_SOLIDARITY_RATES = {
       tranche1: 0.0019,
       tranche2: 0.0021,
       tranche3: 0.0024
+    };
+    const SS_EMPLOYER_SOLIDARITY_RATES = {
+      tranche1: 0.0096,
+      tranche2: 0.0104,
+      tranche3: 0.0122
     };
     const GASTOS_DEDUCIBLES = 2000;
     const MINIMO_PERSONAL_BASE = 5550;
@@ -1509,6 +1551,18 @@
       return SS_GROUP_MIN_BASE_MENSUAL[grupoCotizacion] ? grupoCotizacion : '4-11';
     }
 
+    function normalizaPrimaAtep(primaAtep) {
+      const valor = typeof primaAtep === 'string'
+        ? Number(primaAtep.replace(',', '.'))
+        : Number(primaAtep);
+
+      if (!Number.isFinite(valor)) {
+        return 0;
+      }
+
+      return Math.min(20, Math.max(0, Number(valor.toFixed(2))));
+    }
+
     function tipoDesempleoTrabajador(tipoContrato, discapacidad) {
       if (tipoContrato === 'temporal' && !tieneDiscapacidadReconocida(discapacidad)) {
         return SS_GENERAL_RATES.unemploymentTemporary;
@@ -1517,19 +1571,37 @@
       return SS_GENERAL_RATES.unemploymentIndefinite;
     }
 
+    function tipoDesempleoEmpresa(tipoContrato, discapacidad) {
+      if (tipoContrato === 'temporal' && !tieneDiscapacidadReconocida(discapacidad)) {
+        return SS_EMPLOYER_RATES.unemploymentTemporary;
+      }
+
+      return SS_EMPLOYER_RATES.unemploymentIndefinite;
+    }
+
     function normalizaNumeroHijos(hijos) {
       return Math.max(0, Math.round(Number(hijos) || 0));
     }
 
-    function calcularCuotaSolidaridadTrabajador(brutoAnual) {
+    function formatPercentageInput(value) {
+      const normalized = normalizaPrimaAtep(value);
+
+      if (Number.isInteger(normalized)) {
+        return String(normalized);
+      }
+
+      return normalized.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+    }
+
+    function calcularCuotaSolidaridad(brutoAnual, rates) {
       const limiteTramo1 = SS_BASE_MAX_ANUAL * 1.1;
       const limiteTramo2 = SS_BASE_MAX_ANUAL * 1.5;
       const baseTramo1 = Math.max(0, Math.min(brutoAnual, limiteTramo1) - SS_BASE_MAX_ANUAL);
       const baseTramo2 = Math.max(0, Math.min(brutoAnual, limiteTramo2) - limiteTramo1);
       const baseTramo3 = Math.max(0, brutoAnual - limiteTramo2);
-      const cuotaTramo1 = baseTramo1 * SS_SOLIDARITY_RATES.tranche1;
-      const cuotaTramo2 = baseTramo2 * SS_SOLIDARITY_RATES.tranche2;
-      const cuotaTramo3 = baseTramo3 * SS_SOLIDARITY_RATES.tranche3;
+      const cuotaTramo1 = baseTramo1 * rates.tranche1;
+      const cuotaTramo2 = baseTramo2 * rates.tranche2;
+      const cuotaTramo3 = baseTramo3 * rates.tranche3;
 
       return {
         baseTramo1,
@@ -1542,7 +1614,15 @@
       };
     }
 
-    function calcularCotizacionSeguridadSocial(brutoAnual, tipoContrato = 'indefinido', grupoCotizacion = '4-11', discapacidad = 'ninguna') {
+    function calcularCuotaSolidaridadTrabajador(brutoAnual) {
+      return calcularCuotaSolidaridad(brutoAnual, SS_SOLIDARITY_RATES);
+    }
+
+    function calcularCuotaSolidaridadEmpresa(brutoAnual) {
+      return calcularCuotaSolidaridad(brutoAnual, SS_EMPLOYER_SOLIDARITY_RATES);
+    }
+
+    function calcularCotizacionSeguridadSocial(brutoAnual, tipoContrato = 'indefinido', grupoCotizacion = '4-11', discapacidad = 'ninguna', primaAtep = 0) {
       if (!brutoAnual || brutoAnual <= 0) {
         return {
           total: 0,
@@ -1551,6 +1631,7 @@
           baseMensualTeorica: 0,
           baseMinMensual: 0,
           desempleoRate: tipoDesempleoTrabajador(tipoContrato, discapacidad),
+          desempleoEmpresaRate: tipoDesempleoEmpresa(tipoContrato, discapacidad),
           contingenciasComunes: 0,
           desempleo: 0,
           formacion: 0,
@@ -1559,6 +1640,20 @@
           solidaridadTramo1: 0,
           solidaridadTramo2: 0,
           solidaridadTramo3: 0,
+          empresaContingenciasComunes: 0,
+          empresaDesempleo: 0,
+          empresaFogasa: 0,
+          empresaFormacion: 0,
+          empresaMEI: 0,
+          empresaAtep: 0,
+          empresaAtepRate: 0,
+          empresaAtepConfigurada: false,
+          empresaSolidaridad: 0,
+          empresaSolidaridadTramo1: 0,
+          empresaSolidaridadTramo2: 0,
+          empresaSolidaridadTramo3: 0,
+          empresaTotal: 0,
+          costeEmpresa: 0,
           minBaseAplicada: false,
           maxBaseAplicada: false
         };
@@ -1570,12 +1665,23 @@
       const baseMensualCotizacion = Math.min(SS_BASE_MAX_MENSUAL, Math.max(baseMensualTeorica, baseMinMensual));
       const baseAnualCotizacion = baseMensualCotizacion * 12;
       const desempleoRate = tipoDesempleoTrabajador(tipoContrato, discapacidad);
+      const desempleoEmpresaRate = tipoDesempleoEmpresa(tipoContrato, discapacidad);
+      const atepRate = normalizaPrimaAtep(primaAtep) / 100;
       const contingenciasComunes = baseAnualCotizacion * SS_GENERAL_RATES.common;
       const desempleo = baseAnualCotizacion * desempleoRate;
       const formacion = baseAnualCotizacion * SS_GENERAL_RATES.training;
       const mei = baseAnualCotizacion * SS_GENERAL_RATES.mei;
       const solidaridad = calcularCuotaSolidaridadTrabajador(brutoAnual);
+      const empresaContingenciasComunes = baseAnualCotizacion * SS_EMPLOYER_RATES.common;
+      const empresaDesempleo = baseAnualCotizacion * desempleoEmpresaRate;
+      const empresaFogasa = baseAnualCotizacion * SS_EMPLOYER_RATES.fogasa;
+      const empresaFormacion = baseAnualCotizacion * SS_EMPLOYER_RATES.training;
+      const empresaMEI = baseAnualCotizacion * SS_EMPLOYER_RATES.mei;
+      const empresaAtep = baseAnualCotizacion * atepRate;
+      const empresaSolidaridad = calcularCuotaSolidaridadEmpresa(brutoAnual);
       const total = contingenciasComunes + desempleo + formacion + mei + solidaridad.total;
+      const empresaTotal = empresaContingenciasComunes + empresaDesempleo + empresaFogasa + empresaFormacion + empresaMEI + empresaAtep + empresaSolidaridad.total;
+      const costeEmpresa = brutoAnual + empresaTotal;
 
       return {
         total,
@@ -1584,6 +1690,7 @@
         baseMensualTeorica,
         baseMinMensual,
         desempleoRate,
+        desempleoEmpresaRate,
         contingenciasComunes,
         desempleo,
         formacion,
@@ -1592,6 +1699,20 @@
         solidaridadTramo1: solidaridad.cuotaTramo1,
         solidaridadTramo2: solidaridad.cuotaTramo2,
         solidaridadTramo3: solidaridad.cuotaTramo3,
+        empresaContingenciasComunes,
+        empresaDesempleo,
+        empresaFogasa,
+        empresaFormacion,
+        empresaMEI,
+        empresaAtep,
+        empresaAtepRate: atepRate,
+        empresaAtepConfigurada: atepRate > 0,
+        empresaSolidaridad: empresaSolidaridad.total,
+        empresaSolidaridadTramo1: empresaSolidaridad.cuotaTramo1,
+        empresaSolidaridadTramo2: empresaSolidaridad.cuotaTramo2,
+        empresaSolidaridadTramo3: empresaSolidaridad.cuotaTramo3,
+        empresaTotal,
+        costeEmpresa,
         minBaseAplicada: baseMensualTeorica < baseMinMensual,
         maxBaseAplicada: baseMensualTeorica > SS_BASE_MAX_MENSUAL
       };
@@ -1644,7 +1765,8 @@
       grupoCotizacion = '4-11',
       familiaNumerosa = 'ninguna',
       discapacidad = 'ninguna',
-      movilidadReducida = false
+      movilidadReducida = false,
+      primaAtep = 0
     ) {
       if (!bruto || bruto <= 0) {
         return {
@@ -1662,6 +1784,18 @@
           ssDesempleoRate: 0,
           ssMinBaseAplicada: false,
           ssMaxBaseAplicada: false,
+          ssEmpresa: 0,
+          ssEmpresaContingenciasComunes: 0,
+          ssEmpresaDesempleo: 0,
+          ssEmpresaDesempleoRate: 0,
+          ssEmpresaFogasa: 0,
+          ssEmpresaFormacion: 0,
+          ssEmpresaMEI: 0,
+          ssEmpresaAtep: 0,
+          ssEmpresaAtepRate: 0,
+          ssEmpresaAtepConfigurada: false,
+          ssEmpresaSolidaridad: 0,
+          costeEmpresa: 0,
           tax: 0,
           net: 0,
           eff: 0,
@@ -1685,7 +1819,7 @@
         };
       }
 
-      const cotizacionSS = calcularCotizacionSeguridadSocial(bruto, tipoContrato, grupoCotizacion, discapacidad);
+      const cotizacionSS = calcularCotizacionSeguridadSocial(bruto, tipoContrato, grupoCotizacion, discapacidad, primaAtep);
       const ss = cotizacionSS.total;
       const gastoActivoDiscapacidad = gastoDeducibleTrabajadorActivoDiscapacidad(discapacidad, movilidadReducida);
       const gastosDeduciblesTrabajo = Math.min(
@@ -1749,6 +1883,18 @@
         ssDesempleoRate: cotizacionSS.desempleoRate,
         ssMinBaseAplicada: cotizacionSS.minBaseAplicada,
         ssMaxBaseAplicada: cotizacionSS.maxBaseAplicada,
+        ssEmpresa: cotizacionSS.empresaTotal,
+        ssEmpresaContingenciasComunes: cotizacionSS.empresaContingenciasComunes,
+        ssEmpresaDesempleo: cotizacionSS.empresaDesempleo,
+        ssEmpresaDesempleoRate: cotizacionSS.desempleoEmpresaRate,
+        ssEmpresaFogasa: cotizacionSS.empresaFogasa,
+        ssEmpresaFormacion: cotizacionSS.empresaFormacion,
+        ssEmpresaMEI: cotizacionSS.empresaMEI,
+        ssEmpresaAtep: cotizacionSS.empresaAtep,
+        ssEmpresaAtepRate: cotizacionSS.empresaAtepRate,
+        ssEmpresaAtepConfigurada: cotizacionSS.empresaAtepConfigurada,
+        ssEmpresaSolidaridad: cotizacionSS.empresaSolidaridad,
+        costeEmpresa: cotizacionSS.costeEmpresa,
         tax,
         net: neto,
         eff: efectivaTotal,
@@ -1877,6 +2023,37 @@
       return rows.join('');
     }
 
+    function renderEmployerSocialSecurityRows(data) {
+      const rows = [];
+
+      if (Math.abs(data.ssBaseAnual - data.g) > 0.5) {
+        const ajustes = [];
+
+        if (data.ssMinBaseAplicada) ajustes.push('base mínima de grupo');
+        if (data.ssMaxBaseAplicada) ajustes.push('tope máximo');
+
+        rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Base de cotización estimada${ajustes.length ? ` (${ajustes.join(' y ')})` : ''}</span><span class="breakdown-value">${fmt(data.ssBaseAnual)}</span></div>`);
+      }
+
+      rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Contingencias comunes (23,60%)</span><span class="breakdown-value negative">+ ${fmt(data.ssEmpresaContingenciasComunes)}</span></div>`);
+      rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Desempleo (${pctRate(data.ssEmpresaDesempleoRate)})</span><span class="breakdown-value negative">+ ${fmt(data.ssEmpresaDesempleo)}</span></div>`);
+      rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">FOGASA (0,20%)</span><span class="breakdown-value negative">+ ${fmt(data.ssEmpresaFogasa)}</span></div>`);
+      rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Formación profesional (0,60%)</span><span class="breakdown-value negative">+ ${fmt(data.ssEmpresaFormacion)}</span></div>`);
+      rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">MEI (0,75%)</span><span class="breakdown-value negative">+ ${fmt(data.ssEmpresaMEI)}</span></div>`);
+
+      if (data.ssEmpresaAtepConfigurada) {
+        rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">AT/EP (${pctRate(data.ssEmpresaAtepRate)})</span><span class="breakdown-value negative">+ ${fmt(data.ssEmpresaAtep)}</span></div>`);
+      } else {
+        rows.push('<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">AT/EP (prima por accidentes de trabajo y enfermedades profesionales)</span><span class="breakdown-value muted">Pendiente: introduce la prima aplicable a tu CNAE u ocupación</span></div>');
+      }
+
+      if (data.ssEmpresaSolidaridad > 0) {
+        rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Cuota de solidaridad empresa 2026</span><span class="breakdown-value negative">+ ${fmt(data.ssEmpresaSolidaridad)}</span></div>`);
+      }
+
+      return rows.join('');
+    }
+
     function renderTerritoryOptions(selectedTerritory) {
       return TERRITORY_GROUPS.map(group => `
         <optgroup label="${group.label}">
@@ -1917,7 +2094,8 @@
         state.grupoCotizacion,
         state.familiaNumerosa,
         state.discapacidad,
-        state.movilidadReducida
+        state.movilidadReducida,
+        state.primaAtep
       );
     }
 
@@ -2067,6 +2245,7 @@
         familiaNumerosa: 'ninguna',
         discapacidad: 'ninguna',
         movilidadReducida: false,
+        primaAtep: 0,
         netoObjetivoPaga: 0,
         ...overrides
       };
@@ -2150,6 +2329,7 @@
       const territorySelectId = `${calcId}-territory`;
       const contractSelectId = `${calcId}-contract`;
       const groupSelectId = `${calcId}-group`;
+      const atEpRateId = `${calcId}-atep-rate`;
       const childrenSelectId = `${calcId}-children`;
       const childrenExactId = `${calcId}-children-exact`;
       const ageSelectId = `${calcId}-age`;
@@ -2195,6 +2375,13 @@
                 ${renderSimpleOptions(CONTRIBUTION_GROUPS, state.grupoCotizacion)}
               </select>
             </div>
+            <div class="inline-select inline-gap">
+              <label for="${atEpRateId}">🏭 Prima AT/EP empresa:</label>
+              <div class="inline-input-with-suffix">
+                <input id="${atEpRateId}" type="number" min="0" max="20" step="0.01" value="${formatPercentageInput(state.primaAtep)}" class="company-atep-input" data-calc-index="${calcIndex}" inputmode="decimal">
+                <span>%</span>
+              </div>
+            </div>
             <div class="inline-select inline-gap children-field-group">
               <div class="children-main-row">
                 <label for="${childrenSelectId}">👶 Número de hijos (menores de 25):</label>
@@ -2228,7 +2415,7 @@
               </select>
             </div>
             <div class="inline-select helper-text">
-              💡 Supuestos 2026: trabajador por cuenta ajena en Régimen General durante todo el año. La base mínima de grupo se aplica asumiendo jornada completa; no se modelan horas extra, retribución flexible ni contrato formativo en alternancia. La deducción por familia numerosa se activa manualmente y aproxima su límite por cotizaciones con la cuota obrera calculada; no se modelan abono anticipado, cesiones ni devoluciones por encima de cuota.
+              💡 Supuestos 2026: trabajador por cuenta ajena en Régimen General durante todo el año. La base mínima de grupo se aplica asumiendo jornada completa; no se modelan horas extra, retribución flexible ni contrato formativo en alternancia. La deducción por familia numerosa se activa manualmente y aproxima su límite por cotizaciones con la cuota obrera calculada; no se modelan abono anticipado, cesiones ni devoluciones por encima de cuota. La prima AT/EP depende de la actividad, CNAE u ocupación, por lo que debes introducirla manualmente: si la dejas en 0%, el coste empresa seguirá sin esa parte.
             </div>
           </div>
 
@@ -2244,6 +2431,19 @@
             <div class="metric"><div class="metric-label">Neto por paga</div><div class="metric-value metric-netpay">${fmt(nm)}</div><div class="metric-sublabel metric-netpay-label">${state.pagas} pagas al año</div></div>
             <div class="metric"><div class="metric-label">Tipo efectivo IRPF</div><div class="metric-value metric-irpf negative">${pct(data.tr)}</div><div class="metric-sublabel metric-irpf-label">${fmt(data.tax)} al año</div></div>
             <div class="metric"><div class="metric-label">Carga total</div><div class="metric-value metric-total negative">${pct(data.eff)}</div><div class="metric-sublabel">IRPF + SS</div></div>
+          </div>
+
+          <div class="breakdown employer-cost-card">
+            <div class="breakdown-row"><span class="breakdown-label bold">Coste empresa estimado</span><span class="breakdown-value breakdown-company-cost">${fmt(data.costeEmpresa)}</span></div>
+            <details class="breakdown-details employer-social-security-details">
+              <summary class="breakdown-row breakdown-summary">
+                <span class="breakdown-summary-content">
+                  <span class="breakdown-summary-main"><span class="breakdown-label">Cotización empresa y AT/EP</span><span class="breakdown-value negative breakdown-company-ss">+ ${fmt(data.ssEmpresa)}</span></span>
+                  <span class="breakdown-chevron" aria-hidden="true">▾</span>
+                </span>
+              </summary>
+              <div class="breakdown-dropdown-content employer-social-security-rows">${renderEmployerSocialSecurityRows(data)}</div>
+            </details>
           </div>
 
           <div class="breakdown">
@@ -2331,6 +2531,9 @@
       const groupSelect = calcDiv.querySelector('.group-select');
       if (groupSelect) groupSelect.value = state.grupoCotizacion;
 
+      const atEpInput = calcDiv.querySelector('.company-atep-input');
+      if (atEpInput) atEpInput.value = formatPercentageInput(state.primaAtep);
+
       const childrenSelect = calcDiv.querySelector('.children-select');
       if (childrenSelect) childrenSelect.value = getChildrenSelectValue(state.hijos);
 
@@ -2359,6 +2562,9 @@
       calcDiv.querySelector('.breakdown-g').textContent = fmt(data.g);
       calcDiv.querySelector('.breakdown-ss').innerHTML = `− ${fmt(data.ss)} (${pct(data.sp)})`;
       calcDiv.querySelector('.social-security-rows').innerHTML = renderSocialSecurityRows(data);
+      calcDiv.querySelector('.breakdown-company-cost').textContent = fmt(data.costeEmpresa);
+      calcDiv.querySelector('.breakdown-company-ss').innerHTML = `+ ${fmt(data.ssEmpresa)}`;
+      calcDiv.querySelector('.employer-social-security-rows').innerHTML = renderEmployerSocialSecurityRows(data);
       calcDiv.querySelector('.breakdown-tax').innerHTML = `− ${fmt(data.tax)} (${pct(data.ip)})`;
       calcDiv.querySelector('.deduction-rows').innerHTML = renderDeductionRows(data);
       calcDiv.querySelector('.breakdown-net').textContent = fmt(data.net);
@@ -2440,6 +2646,13 @@
         sel.addEventListener('change', function () {
           const calcIndex = Number(this.dataset.calcIndex);
           calculators[calcIndex].grupoCotizacion = this.value;
+          updateCalculatorUI(calcIndex);
+        });
+      });
+      document.querySelectorAll('.company-atep-input').forEach(input => {
+        input.addEventListener('change', function () {
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].primaAtep = normalizaPrimaAtep(this.value);
           updateCalculatorUI(calcIndex);
         });
       });
