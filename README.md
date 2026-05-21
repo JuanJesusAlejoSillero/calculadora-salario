@@ -8,7 +8,7 @@
   - [🤝 Cómo contribuir](#-cómo-contribuir)
   - [📄 Licencia](#-licencia)
 
-Calculadora web para estimar el salario bruto y neto anual y por paga en España, con modo individual o comparativo entre varios escenarios.
+Calculadora web para estimar el salario bruto, el salario neto anual y por paga y el coste empresa aproximado en España, con modo individual o comparativo entre varios escenarios.
 
 La aplicación **funciona completamente offline y es 100% privada**: todos los cálculos se realizan en el lado del cliente, es decir, en tu navegador, sin enviar ni recibir datos de servidores externos.
 
@@ -26,7 +26,7 @@ Los resultados proporcionados por la herramienta son **meramente orientativos** 
 
 2. Elige el modo de entrada con el selector superior: `bruto anual` o `neto por paga`.
 3. Ajusta el salario bruto anual o el neto objetivo por paga.
-4. Selecciona el territorio, el tipo de contrato, el grupo de cotización, el número de hijos, si aplica familia numerosa, la edad y la situación de discapacidad.
+4. Selecciona el territorio, el tipo de contrato, el grupo de cotización, la prima AT/EP aplicable, el número de hijos, si aplica familia numerosa, la edad y la situación de discapacidad.
 5. Si seleccionas `5 o más hijos`, introduce además el número exacto para no perder el mínimo por descendientes adicional.
 6. Elige el número de pagas al año.
 
@@ -43,6 +43,7 @@ Si lo deseas, puedes activar el modo **Comparar salarios** para ver entre 2 y 10
 - Cálculo en 12, 13, 14, 15 o 16 pagas.
 - Escala diferenciada según territorio, incluyendo territorios forales y la deducción específica de Ceuta y Melilla.
 - Cotización del trabajador desglosada en contingencias comunes, desempleo, formación profesional, MEI y cuota de solidaridad, con tope máximo y base mínima por grupo de cotización.
+- Coste empresa estimado, con desglose de cuotas empresariales de 2026 y AT/EP configurable manualmente según CNAE u ocupación.
 - Mínimos por descendientes con soporte para `5 o más hijos` indicando el número exacto.
 - Deducción explícita por familia numerosa general o especial, con incremento por hijos adicionales sobre el mínimo estándar de la categoría.
 - Ajuste del mínimo personal por edad del contribuyente.
@@ -58,7 +59,9 @@ Si lo deseas, puedes activar el modo **Comparar salarios** para ver entre 2 y 10
 La calculadora aplica un modelo aproximado:
 
 - Seguridad Social del trabajador según el Régimen General 2026: 4,70% por contingencias comunes, desempleo del 1,55% o 1,60% según el contrato, 0,10% por formación profesional, 0,15% por MEI y cuota de solidaridad cuando el salario supera la base máxima anual.
+- Coste empresa aproximado según el Régimen General 2026: 23,60% por contingencias comunes, desempleo del 5,50% o 6,70% según el contrato, 0,20% de FOGASA, 0,60% por formación profesional, 0,75% por MEI, cuota de solidaridad empresarial cuando se supera la base máxima anual y la prima AT/EP que introduzca el usuario.
 - Base de cotización calculada con base máxima mensual de 5.101,20 € y base mínima mensual dependiente del grupo de cotización seleccionado.
+- La prima por accidentes de trabajo y enfermedades profesionales depende de la actividad y de la tarifa de primas aplicable al CNAE u ocupación, por lo que se configura manualmente; si no se informa, el coste empresa queda sin esa parte.
 - Rendimiento neto del trabajo: bruto anual menos Seguridad Social y 2.000 € de gastos deducibles generales, más el gasto adicional por trabajador activo con discapacidad cuando procede.
 - Reducción por obtención de rendimientos del trabajo según el artículo 20 de la LIRPF para salarios bajos.
 - El mínimo personal y familiar no se resta de la base sin más: se calcula la cuota completa y se descuenta el efecto del mínimo en cuota, como hace la LIRPF.
