@@ -519,12 +519,37 @@
       gap: 12px;
     }
 
+    .children-field-group {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: stretch;
+      gap: 0.45rem;
+      width: 100%;
+    }
+
+    .children-main-row,
+    .children-exact-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .children-exact-wrapper {
+      padding-left: 0.9rem;
+      margin-left: 0.15rem;
+      border-left: 2px solid var(--border-color);
+    }
+
     .inline-select label {
       font-weight: 500;
       color: var(--text-primary);
     }
 
-    select {
+    select,
+    .children-exact-input {
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
       border-radius: 60px;
@@ -537,9 +562,14 @@
       max-width: 100%;
     }
 
-    select:focus {
+    select:focus,
+    .children-exact-input:focus {
       outline: none;
       border-color: var(--accent-blue);
+    }
+
+    .children-exact-input {
+      width: 6.5rem;
     }
 
     .metrics {
@@ -589,6 +619,66 @@
       border: 1px solid var(--border-color);
     }
 
+    .breakdown-details {
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .breakdown-details:last-of-type {
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .breakdown-details[open] {
+      padding-bottom: 0.2rem;
+    }
+
+    .breakdown-summary {
+      list-style: none;
+      cursor: pointer;
+    }
+
+    .breakdown-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .breakdown-summary-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+    }
+
+    .breakdown-summary-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .breakdown-chevron {
+      color: var(--text-tertiary);
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1;
+      transition: transform 0.2s ease, color 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .breakdown-details[open] .breakdown-chevron {
+      transform: rotate(180deg);
+      color: var(--accent-blue);
+    }
+
+    .breakdown-summary:hover .breakdown-chevron,
+    .breakdown-summary:hover .breakdown-label {
+      color: var(--accent-blue);
+    }
+
+    .breakdown-dropdown-content {
+      padding-bottom: 0.2rem;
+    }
+
     .breakdown-row {
       display: flex;
       justify-content: space-between;
@@ -602,8 +692,21 @@
       border-bottom: none;
     }
 
+    .breakdown-subrow {
+      padding-left: 0.9rem;
+      font-size: 0.82rem;
+    }
+
+    .breakdown-dropdown-content .breakdown-subrow:first-child {
+      padding-top: 0.15rem;
+    }
+
     .breakdown-label {
       color: var(--text-secondary);
+    }
+
+    .breakdown-subrow .breakdown-label {
+      color: var(--text-tertiary);
     }
 
     .breakdown-label.bold {
@@ -763,6 +866,10 @@
       display: none;
     }
 
+    .social-security-rows:empty {
+      display: none;
+    }
+
     footer {
       text-align: center;
       margin-top: 3rem;
@@ -840,8 +947,10 @@
     <header>
       <div class="header-toolbar">
         <div class="salary-mode-selector" role="group" aria-label="Modo de entrada salarial">
-          <button type="button" class="salary-mode-btn active" data-salary-mode="gross" aria-pressed="true">💶 Bruto anual</button>
-          <button type="button" class="salary-mode-btn" data-salary-mode="net" aria-pressed="false">💱 Neto por paga</button>
+          <button type="button" class="salary-mode-btn active" data-salary-mode="gross" aria-pressed="true">💶 Bruto
+            anual</button>
+          <button type="button" class="salary-mode-btn" data-salary-mode="net" aria-pressed="false">💱 Neto por
+            paga</button>
         </div>
         <button type="button" class="toolbar-switch" id="themeToggle" aria-pressed="true">
           🌓 <span id="themeText">Modo claro</span>
@@ -853,7 +962,8 @@
       </h1>
       <p class="subtitle">España 2026 · IRPF + Cotizaciones SS</p>
       <div class="repo-link">
-        <a href="https://github.com/JuanJesusAlejoSillero/calculadora-salario" target="_blank" rel="noreferrer noopener">📂 Repositorio del proyecto en GitHub</a>
+        <a href="https://github.com/JuanJesusAlejoSillero/calculadora-salario" target="_blank"
+          rel="noreferrer noopener">📂 Repositorio del proyecto en GitHub</a>
       </div>
       <div class="mode-selector">
         <button type="button" class="mode-btn active" data-mode="single" aria-pressed="true">📊 Calcular</button>
@@ -862,9 +972,12 @@
       <div class="compare-controls" id="compareControls" aria-label="Control de calculadoras en comparación" hidden>
         <span class="compare-controls-label">Calculadoras activas</span>
         <div class="compare-controls-actions">
-          <button type="button" class="compare-count-btn" id="removeCalculatorBtn" aria-label="Quitar una calculadora">−</button>
-          <output class="compare-count-display" id="calculatorCountDisplay" for="removeCalculatorBtn addCalculatorBtn" aria-live="polite">2 calculadoras</output>
-          <button type="button" class="compare-count-btn" id="addCalculatorBtn" aria-label="Añadir una calculadora">+</button>
+          <button type="button" class="compare-count-btn" id="removeCalculatorBtn"
+            aria-label="Quitar una calculadora">−</button>
+          <output class="compare-count-display" id="calculatorCountDisplay" for="removeCalculatorBtn addCalculatorBtn"
+            aria-live="polite">2 calculadoras</output>
+          <button type="button" class="compare-count-btn" id="addCalculatorBtn"
+            aria-label="Añadir una calculadora">+</button>
         </div>
       </div>
     </header>
@@ -875,24 +988,51 @@
       <section class="page-notes" aria-label="Notas fiscales y legales">
         <aside class="note">
           <strong>📋 Fiscalidad 2026 · IRPF por comunidades autónomas</strong><br>
-          • <strong>Régimen común</strong>: cada comunidad autónoma tiene su propia escala autonómica; esta calculadora aplica tablas específicas para Andalucía, Aragón, Asturias, Baleares, Canarias, Cantabria, Castilla-La Mancha, Castilla y León, Cataluña, Comunitat Valenciana, Extremadura, Galicia, La Rioja, Madrid y Murcia.<br>
-          • <strong>Navarra (Régimen Foral)</strong>: mantiene una escala propia; en esta calculadora se conserva una aproximación específica.<br>
-          • <strong>País Vasco (Régimen Foral)</strong>: Bizkaia, Gipuzkoa y Araba gestionan su propio IRPF; aquí se aplica una escala agregada y orientativa.<br>
-          • <strong>Ceuta y Melilla</strong>: se aplica la escala especial publicada por la AEAT y una deducción del 60% sobre la cuota íntegra, asumiendo residencia efectiva y que todo el salario se obtiene allí.<br>
+          • <strong>Régimen común</strong>: cada comunidad autónoma tiene su propia escala autonómica; esta calculadora
+          aplica tablas específicas para Andalucía, Aragón, Asturias, Baleares, Canarias, Cantabria, Castilla-La Mancha,
+          Castilla y León, Cataluña, Comunitat Valenciana, Extremadura, Galicia, La Rioja, Madrid y Murcia.<br>
+          • <strong>Navarra (Régimen Foral)</strong>: mantiene una escala propia; en esta calculadora se conserva una
+          aproximación específica.<br>
+          • <strong>País Vasco (Régimen Foral)</strong>: Bizkaia, Gipuzkoa y Araba gestionan su propio IRPF; aquí se
+          aplica una escala agregada y orientativa.<br>
+          • <strong>Ceuta y Melilla</strong>: se aplica la escala especial publicada por la AEAT y una deducción del 60%
+          sobre la cuota íntegra, asumiendo residencia efectiva y que todo el salario se obtiene allí.<br>
           • <strong>Mínimos por descendientes</strong>: 2.400€ (1º), 2.700€ (2º), 4.000€ (3º), 4.500€ (4º+).<br>
-          • <strong>Reducción por rendimientos del trabajo</strong> (art. 20): se aplica sobre el rendimiento neto del trabajo en salarios bajos.<br>
-          • <strong>Deducción para rentas bajas (SMI 2026)</strong>: hasta 590,89€ en cuota para salarios hasta 17.094€, decreciente hasta 20.048,45€ y limitada por la cuota disponible.<br>
-          • Los casos con cambio de residencia dentro del año o con rentas obtenidas fuera de Ceuta/Melilla no se prorratean en esta versión.<br>
-          • <strong>Edad del contribuyente</strong>: A partir de 65 años se añaden 1.150€ al mínimo personal; desde 75 años, 8.100€ total (5.550€ + 2.550€).<br>
-          • La cotización a la SS del trabajador es del 6,5% con base máxima 58.914€ anuales.
+          • <strong>Discapacidad del contribuyente</strong>: se integra el mínimo por discapacidad del art. 60 LIRPF y
+          el gasto deducible adicional para trabajadores activos del art. 19.2.f., distinguiendo entre 33%-64%,
+          33%-64% con movilidad reducida o asistencia de terceros y 65% o más.<br>
+          • <strong>Reducción por rendimientos del trabajo</strong> (art. 20): se aplica sobre el rendimiento neto del
+          trabajo en salarios bajos.<br>
+          • <strong>Deducción para rentas bajas (SMI 2026)</strong>: hasta 590,89€ en cuota para salarios hasta 17.094€,
+          decreciente hasta 20.048,45€ y limitada por la cuota disponible.<br>
+          • <strong>Cotización del trabajador en Régimen General 2026</strong>: contingencias comunes 4,70%; desempleo
+          1,55% en indefinidos y asimilados o 1,60% en temporales; formación profesional 0,10%; MEI 0,15%; y cuota de
+          solidaridad si se supera la base máxima mensual de 5.101,20€.<br>
+          • Los casos con cambio de residencia dentro del año o con rentas obtenidas fuera de Ceuta/Melilla no se
+          prorratean en esta versión.<br>
+          • <strong>Edad del contribuyente</strong>: A partir de 65 años se añaden 1.150€ al mínimo personal; desde 75
+          años, 8.100€ total (5.550€ + 2.550€).<br>
+          • <strong>Importante</strong>: el IRPF mostrado es una <strong>estimación anual</strong> de cuota final. La
+          retención exacta de nómina depende de la situación declarada en el modelo 145, de regularizaciones del pagador
+          y de supuestos no modelados en esta versión.
         </aside>
 
         <aside class="note note-warning">
-          <strong>⚠️ Descargo de responsabilidad:</strong> Los resultados son <strong>meramente orientativos</strong> y <strong>no constituyen asesoramiento fiscal</strong>. Esta herramienta no sustituye a un gestor o asesor fiscal profesional. Las normativas pueden cambiar y cada caso personal (ingresos del cónyuge, discapacidad, deducciones autonómicas específicas, etc.) puede alterar significativamente el resultado real. <strong>Consulta siempre con un profesional antes de tomar decisiones económicas.</strong>
+          <strong>⚠️ Descargo de responsabilidad:</strong> Los resultados son <strong>meramente orientativos</strong> y
+          <strong>no constituyen asesoramiento fiscal</strong>. Esta herramienta no sustituye a un gestor o asesor
+          fiscal profesional. Las normativas pueden cambiar y cada caso personal (ingresos del cónyuge, discapacidad,
+          deducciones autonómicas específicas, etc.) puede alterar significativamente el resultado real.
+          <strong>Consulta siempre con un profesional antes de tomar decisiones económicas.</strong>
         </aside>
 
         <aside class="note note-info">
-          <strong>🧮 La fiscalidad es un tema complejo y esta herramienta podría contener errores</strong> derivados de mi falta de conocimientos en el ámbito. El repositorio es público, por lo que <strong>te animo a enviar mejoras</strong> a través de una <a href="https://github.com/JuanJesusAlejoSillero/calculadora-salario/pulls" target="_blank" rel="noreferrer noopener">pull request</a> o dejando una <a href="https://github.com/JuanJesusAlejoSillero/calculadora-salario/issues" target="_blank" rel="noreferrer noopener">issue</a> con el problema encontrado. <strong>¡Muchas gracias!</strong>
+          <strong>🧮 La fiscalidad es un tema complejo y esta herramienta podría contener errores</strong> derivados de
+          mi falta de conocimientos en el ámbito. El repositorio es público, por lo que <strong>te animo a enviar
+            mejoras</strong> a través de una <a
+            href="https://github.com/JuanJesusAlejoSillero/calculadora-salario/pulls" target="_blank"
+            rel="noreferrer noopener">pull request</a> o dejando una <a
+            href="https://github.com/JuanJesusAlejoSillero/calculadora-salario/issues" target="_blank"
+            rel="noreferrer noopener">issue</a> con el problema encontrado. <strong>¡Muchas gracias!</strong>
         </aside>
       </section>
     </main>
@@ -1127,9 +1267,52 @@
       }
     ];
 
+    const CONTRACT_TYPES = [
+      { value: 'indefinido', label: 'Indefinido / fijo-discontinuo / relevo / práctica profesional' },
+      { value: 'temporal', label: 'Temporal' }
+    ];
+
+    const CONTRIBUTION_GROUPS = [
+      { value: '1', label: 'Grupo 1 · Ingenieros y licenciados' },
+      { value: '2', label: 'Grupo 2 · Ingenieros técnicos, peritos y ayudantes titulados' },
+      { value: '3', label: 'Grupo 3 · Jefes administrativos y de taller' },
+      { value: '4-11', label: 'Grupo 4-11 · Resto de grupos del Régimen General' }
+    ];
+
+    const DISABILITY_OPTIONS = [
+      { value: 'ninguna', label: 'Sin discapacidad' },
+      { value: '33-64', label: 'Del 33% al 64%' },
+      { value: '33-64-movilidad', label: 'Del 33% al 64% con movilidad reducida o asistencia' },
+      { value: '65+', label: 'Discapacidad igual o superior al 65%' }
+    ];
+
+    const FAMILY_NUMEROSA_OPTIONS = [
+      { value: 'ninguna', label: 'No aplicar' },
+      { value: 'general', label: 'General / supuesto equiparado de 2 hijos' },
+      { value: 'especial', label: 'Especial' }
+    ];
+
     // Constantes generales
-    const SS_RATE = 0.065;
-    const SS_MAX_ANUAL = 58914;
+    const SS_BASE_MAX_MENSUAL = 5101.2;
+    const SS_BASE_MAX_ANUAL = SS_BASE_MAX_MENSUAL * 12;
+    const SS_GROUP_MIN_BASE_MENSUAL = {
+      '1': 1989.3,
+      '2': 1649.7,
+      '3': 1435.2,
+      '4-11': 1424.4
+    };
+    const SS_GENERAL_RATES = {
+      common: 0.047,
+      unemploymentIndefinite: 0.0155,
+      unemploymentTemporary: 0.016,
+      training: 0.001,
+      mei: 0.0015
+    };
+    const SS_SOLIDARITY_RATES = {
+      tranche1: 0.0019,
+      tranche2: 0.0021,
+      tranche3: 0.0024
+    };
     const GASTOS_DEDUCIBLES = 2000;
     const MINIMO_PERSONAL_BASE = 5550;
     const REDUCCION_TRABAJO_TRAMO1 = 14852;
@@ -1141,6 +1324,8 @@
     const DEDUCCION_SMI_2026_TRAMO1 = 17094;
     const DEDUCCION_SMI_2026_TRAMO2 = 20048.45;
     const DEDUCCION_CEUTA_MELILLA_RATE = 0.60;
+    const DEDUCCION_FAMILIA_NUMEROSA_BASE = 1200;
+    const DEDUCCION_FAMILIA_NUMEROSA_POR_HIJO_EXTRA = 600;
 
     // Art. 20 LIRPF. El umbral se calcula sobre el rendimiento neto antes de restar
     // los 2.000 EUR generales del art. 19.2.f.
@@ -1203,6 +1388,215 @@
       return territorio === "ceuta" || territorio === "melilla";
     }
 
+    function normalizaDiscapacidad(discapacidad, movilidadReducida = false) {
+      if (discapacidad === '65+') {
+        return '65+';
+      }
+
+      if (discapacidad === '33-64-movilidad' || (discapacidad === '33-64' && movilidadReducida)) {
+        return '33-64-movilidad';
+      }
+
+      if (discapacidad === '33-64') {
+        return '33-64';
+      }
+
+      return 'ninguna';
+    }
+
+    function tieneMovilidadReducidaOAsistencia(discapacidad) {
+      return normalizaDiscapacidad(discapacidad) === '33-64-movilidad';
+    }
+
+    function tieneDiscapacidadReconocida(discapacidad) {
+      return normalizaDiscapacidad(discapacidad) !== 'ninguna';
+    }
+
+    function normalizaFamiliaNumerosa(tipoFamiliaNumerosa) {
+      if (tipoFamiliaNumerosa === 'especial') {
+        return 'especial';
+      }
+
+      if (tipoFamiliaNumerosa === 'general') {
+        return 'general';
+      }
+
+      return 'ninguna';
+    }
+
+    function umbralHijosFamiliaNumerosa(tipoFamiliaNumerosa) {
+      if (tipoFamiliaNumerosa === 'especial') {
+        return 5;
+      }
+
+      if (tipoFamiliaNumerosa === 'general') {
+        return 3;
+      }
+
+      return 0;
+    }
+
+    function calcularDeduccionFamiliaNumerosa(tipoFamiliaNumerosa, hijos, cotizacionSS) {
+      const tipoNormalizado = normalizaFamiliaNumerosa(tipoFamiliaNumerosa);
+      const limiteCotizacionAproximado = Math.max(0, cotizacionSS || 0);
+
+      if (tipoNormalizado === 'ninguna') {
+        return {
+          tipo: 'ninguna',
+          baseTeorica: 0,
+          baseAplicable: 0,
+          incrementoEspecial: 0,
+          hijosExtra: 0,
+          incrementoHijosExtra: 0,
+          total: 0,
+          limiteCotizacionAproximado,
+          umbralHijosExtra: 0
+        };
+      }
+
+      const baseAplicable = Math.min(DEDUCCION_FAMILIA_NUMEROSA_BASE, limiteCotizacionAproximado);
+      const incrementoEspecial = tipoNormalizado === 'especial' ? DEDUCCION_FAMILIA_NUMEROSA_BASE : 0;
+      const umbralHijosExtra = umbralHijosFamiliaNumerosa(tipoNormalizado);
+      const hijosExtra = Math.max(0, normalizaNumeroHijos(hijos) - umbralHijosExtra);
+      const incrementoHijosExtra = hijosExtra * DEDUCCION_FAMILIA_NUMEROSA_POR_HIJO_EXTRA;
+
+      return {
+        tipo: tipoNormalizado,
+        baseTeorica: DEDUCCION_FAMILIA_NUMEROSA_BASE,
+        baseAplicable,
+        incrementoEspecial,
+        hijosExtra,
+        incrementoHijosExtra,
+        total: baseAplicable + incrementoEspecial + incrementoHijosExtra,
+        limiteCotizacionAproximado,
+        umbralHijosExtra
+      };
+    }
+
+    function minimoPorDiscapacidadContribuyente(discapacidad, movilidadReducida = false) {
+      const discapacidadNormalizada = normalizaDiscapacidad(discapacidad, movilidadReducida);
+
+      if (discapacidadNormalizada === '65+') {
+        return 12000;
+      }
+
+      if (discapacidadNormalizada === '33-64-movilidad') {
+        return 6000;
+      }
+
+      if (discapacidadNormalizada === '33-64') {
+        return 3000;
+      }
+
+      return 0;
+    }
+
+    function gastoDeducibleTrabajadorActivoDiscapacidad(discapacidad, movilidadReducida = false) {
+      const discapacidadNormalizada = normalizaDiscapacidad(discapacidad, movilidadReducida);
+
+      if (discapacidadNormalizada === '65+' || discapacidadNormalizada === '33-64-movilidad') {
+        return 7750;
+      }
+
+      if (discapacidadNormalizada === '33-64') {
+        return 3500;
+      }
+
+      return 0;
+    }
+
+    function normalizaGrupoCotizacion(grupoCotizacion) {
+      return SS_GROUP_MIN_BASE_MENSUAL[grupoCotizacion] ? grupoCotizacion : '4-11';
+    }
+
+    function tipoDesempleoTrabajador(tipoContrato, discapacidad) {
+      if (tipoContrato === 'temporal' && !tieneDiscapacidadReconocida(discapacidad)) {
+        return SS_GENERAL_RATES.unemploymentTemporary;
+      }
+
+      return SS_GENERAL_RATES.unemploymentIndefinite;
+    }
+
+    function normalizaNumeroHijos(hijos) {
+      return Math.max(0, Math.round(Number(hijos) || 0));
+    }
+
+    function calcularCuotaSolidaridadTrabajador(brutoAnual) {
+      const limiteTramo1 = SS_BASE_MAX_ANUAL * 1.1;
+      const limiteTramo2 = SS_BASE_MAX_ANUAL * 1.5;
+      const baseTramo1 = Math.max(0, Math.min(brutoAnual, limiteTramo1) - SS_BASE_MAX_ANUAL);
+      const baseTramo2 = Math.max(0, Math.min(brutoAnual, limiteTramo2) - limiteTramo1);
+      const baseTramo3 = Math.max(0, brutoAnual - limiteTramo2);
+      const cuotaTramo1 = baseTramo1 * SS_SOLIDARITY_RATES.tranche1;
+      const cuotaTramo2 = baseTramo2 * SS_SOLIDARITY_RATES.tranche2;
+      const cuotaTramo3 = baseTramo3 * SS_SOLIDARITY_RATES.tranche3;
+
+      return {
+        baseTramo1,
+        baseTramo2,
+        baseTramo3,
+        cuotaTramo1,
+        cuotaTramo2,
+        cuotaTramo3,
+        total: cuotaTramo1 + cuotaTramo2 + cuotaTramo3
+      };
+    }
+
+    function calcularCotizacionSeguridadSocial(brutoAnual, tipoContrato = 'indefinido', grupoCotizacion = '4-11', discapacidad = 'ninguna') {
+      if (!brutoAnual || brutoAnual <= 0) {
+        return {
+          total: 0,
+          baseAnualCotizacion: 0,
+          baseMensualCotizacion: 0,
+          baseMensualTeorica: 0,
+          baseMinMensual: 0,
+          desempleoRate: tipoDesempleoTrabajador(tipoContrato, discapacidad),
+          contingenciasComunes: 0,
+          desempleo: 0,
+          formacion: 0,
+          mei: 0,
+          solidaridad: 0,
+          solidaridadTramo1: 0,
+          solidaridadTramo2: 0,
+          solidaridadTramo3: 0,
+          minBaseAplicada: false,
+          maxBaseAplicada: false
+        };
+      }
+
+      const grupoNormalizado = normalizaGrupoCotizacion(grupoCotizacion);
+      const baseMinMensual = SS_GROUP_MIN_BASE_MENSUAL[grupoNormalizado];
+      const baseMensualTeorica = brutoAnual / 12;
+      const baseMensualCotizacion = Math.min(SS_BASE_MAX_MENSUAL, Math.max(baseMensualTeorica, baseMinMensual));
+      const baseAnualCotizacion = baseMensualCotizacion * 12;
+      const desempleoRate = tipoDesempleoTrabajador(tipoContrato, discapacidad);
+      const contingenciasComunes = baseAnualCotizacion * SS_GENERAL_RATES.common;
+      const desempleo = baseAnualCotizacion * desempleoRate;
+      const formacion = baseAnualCotizacion * SS_GENERAL_RATES.training;
+      const mei = baseAnualCotizacion * SS_GENERAL_RATES.mei;
+      const solidaridad = calcularCuotaSolidaridadTrabajador(brutoAnual);
+      const total = contingenciasComunes + desempleo + formacion + mei + solidaridad.total;
+
+      return {
+        total,
+        baseAnualCotizacion,
+        baseMensualCotizacion,
+        baseMensualTeorica,
+        baseMinMensual,
+        desempleoRate,
+        contingenciasComunes,
+        desempleo,
+        formacion,
+        mei,
+        solidaridad: solidaridad.total,
+        solidaridadTramo1: solidaridad.cuotaTramo1,
+        solidaridadTramo2: solidaridad.cuotaTramo2,
+        solidaridadTramo3: solidaridad.cuotaTramo3,
+        minBaseAplicada: baseMensualTeorica < baseMinMensual,
+        maxBaseAplicada: baseMensualTeorica > SS_BASE_MAX_MENSUAL
+      };
+    }
+
     function calcularCuotaProgresiva(baseLiquidable, tramos) {
       if (baseLiquidable <= 0) return 0;
 
@@ -1241,11 +1635,33 @@
     }
 
     // Función principal de cálculo
-    function calcularSalario(bruto, hijos = 0, territorio = "comun", rangoEdad = "menor65") {
+    function calcularSalario(
+      bruto,
+      hijos = 0,
+      territorio = "comun",
+      rangoEdad = "menor65",
+      tipoContrato = 'indefinido',
+      grupoCotizacion = '4-11',
+      familiaNumerosa = 'ninguna',
+      discapacidad = 'ninguna',
+      movilidadReducida = false
+    ) {
       if (!bruto || bruto <= 0) {
         return {
           g: 0,
           ss: 0,
+          ssBaseAnual: 0,
+          ssBaseMensual: 0,
+          ssBaseMensualTeorica: 0,
+          ssBaseMinMensual: 0,
+          ssContingenciasComunes: 0,
+          ssDesempleo: 0,
+          ssFormacion: 0,
+          ssMEI: 0,
+          ssSolidaridad: 0,
+          ssDesempleoRate: 0,
+          ssMinBaseAplicada: false,
+          ssMaxBaseAplicada: false,
           tax: 0,
           net: 0,
           eff: 0,
@@ -1254,16 +1670,29 @@
           sp: 0,
           ip: 0,
           reduccionTrabajo: 0,
+          gastosDeduciblesTrabajo: 0,
+          gastoActivoDiscapacidad: 0,
           minimoPersonalFamiliar: 0,
+          minimoDiscapacidadContribuyente: 0,
           efectoMinimo: 0,
           cuotaAntesMinimo: 0,
           cuotaTrasMinimo: 0,
-          deduccionRentasBajas: 0
+          deduccionRentasBajas: 0,
+          deduccionFamiliaNumerosa: 0,
+          deduccionFamiliaNumerosaPotencial: 0,
+          deduccionFamiliaNumerosaTipo: 'ninguna',
+          deduccionFamiliaNumerosaHijosExtraCount: 0
         };
       }
 
-      const ss = Math.min(bruto, SS_MAX_ANUAL) * SS_RATE;
-      const rendimientoNetoPrevio = Math.max(0, bruto - ss - GASTOS_DEDUCIBLES);
+      const cotizacionSS = calcularCotizacionSeguridadSocial(bruto, tipoContrato, grupoCotizacion, discapacidad);
+      const ss = cotizacionSS.total;
+      const gastoActivoDiscapacidad = gastoDeducibleTrabajadorActivoDiscapacidad(discapacidad, movilidadReducida);
+      const gastosDeduciblesTrabajo = Math.min(
+        Math.max(0, bruto - ss),
+        GASTOS_DEDUCIBLES + gastoActivoDiscapacidad
+      );
+      const rendimientoNetoPrevio = Math.max(0, bruto - ss - gastosDeduciblesTrabajo);
       const rendimientoNetoParaReduccion = Math.max(0, bruto - ss);
       const reduccionTrabajo = Math.min(
         rendimientoNetoPrevio,
@@ -1272,7 +1701,8 @@
 
       const minimoDesc = minimoPorDescendientes(hijos);
       const minimoEdad = minimoPorEdad(rangoEdad);
-      const minimoPersonalFamiliar = minimoEdad + minimoDesc;
+      const minimoDiscapacidad = minimoPorDiscapacidadContribuyente(discapacidad, movilidadReducida);
+      const minimoPersonalFamiliar = minimoEdad + minimoDesc + minimoDiscapacidad;
 
       const baseLiquidable = Math.max(0, rendimientoNetoPrevio - reduccionTrabajo);
       const { cuotaAntesMinimo, efectoMinimo, cuotaTrasMinimo } = calcularCuotaTrasMinimo(
@@ -1292,7 +1722,13 @@
         cuotaTrasDeduccionTerritorial,
         deduccionRentasBajas2026(bruto)
       );
-      const tax = Math.max(0, cuotaTrasDeduccionTerritorial - deduccionRentasBajas);
+      const cuotaTrasDeduccionRentasBajas = Math.max(0, cuotaTrasDeduccionTerritorial - deduccionRentasBajas);
+      const deduccionFamiliaNumerosaCalc = calcularDeduccionFamiliaNumerosa(familiaNumerosa, hijos, ss);
+      const deduccionFamiliaNumerosa = Math.min(
+        cuotaTrasDeduccionRentasBajas,
+        deduccionFamiliaNumerosaCalc.total
+      );
+      const tax = Math.max(0, cuotaTrasDeduccionRentasBajas - deduccionFamiliaNumerosa);
 
       const neto = bruto - ss - tax;
       const efectivaTotal = (ss + tax) / bruto;
@@ -1300,8 +1736,20 @@
 
       return {
         g: bruto,
-        ss: ss,
-        tax: tax,
+        ss,
+        ssBaseAnual: cotizacionSS.baseAnualCotizacion,
+        ssBaseMensual: cotizacionSS.baseMensualCotizacion,
+        ssBaseMensualTeorica: cotizacionSS.baseMensualTeorica,
+        ssBaseMinMensual: cotizacionSS.baseMinMensual,
+        ssContingenciasComunes: cotizacionSS.contingenciasComunes,
+        ssDesempleo: cotizacionSS.desempleo,
+        ssFormacion: cotizacionSS.formacion,
+        ssMEI: cotizacionSS.mei,
+        ssSolidaridad: cotizacionSS.solidaridad,
+        ssDesempleoRate: cotizacionSS.desempleoRate,
+        ssMinBaseAplicada: cotizacionSS.minBaseAplicada,
+        ssMaxBaseAplicada: cotizacionSS.maxBaseAplicada,
+        tax,
         net: neto,
         eff: efectivaTotal,
         tr: tipoMedioIrpf,
@@ -1309,13 +1757,20 @@
         sp: ss / bruto,
         ip: tax / bruto,
         reduccionTrabajo,
+        gastosDeduciblesTrabajo,
+        gastoActivoDiscapacidad,
         minimoPersonalFamiliar,
+        minimoDiscapacidadContribuyente: minimoDiscapacidad,
         efectoMinimo,
         cuotaAntesMinimo,
         cuotaTrasMinimo,
         deduccionCeutaMelilla,
         cuotaTrasDeduccionTerritorial,
-        deduccionRentasBajas
+        deduccionRentasBajas,
+        deduccionFamiliaNumerosa,
+        deduccionFamiliaNumerosaPotencial: deduccionFamiliaNumerosaCalc.total,
+        deduccionFamiliaNumerosaTipo: deduccionFamiliaNumerosaCalc.tipo,
+        deduccionFamiliaNumerosaHijosExtraCount: deduccionFamiliaNumerosaCalc.hijosExtra
       };
     }
 
@@ -1323,6 +1778,7 @@
     function fmt(n) { return Math.round(n).toLocaleString('es-ES') + ' €'; }
     function fmtPlain(n) { return Math.round(n).toLocaleString('es-ES'); }
     function pct(n) { return ((n || 0) * 100).toFixed(1) + '%'; }
+    function pctRate(n) { return ((n || 0) * 100).toFixed(2).replace('.', ',') + '%'; }
 
     const BASE_GROSS_RANGE_MAX = 300000;
     const MAX_SUPPORTED_GROSS = 1500000;
@@ -1362,20 +1818,60 @@
     function renderDeductionRows(data) {
       const rows = [];
 
+      if (data.gastoActivoDiscapacidad > 0) {
+        rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Gasto extra trabajador activo con discapacidad</span><span class="breakdown-value positive">− ${fmt(data.gastoActivoDiscapacidad)}</span></div>`);
+      }
+
       if (data.reduccionTrabajo > 0) {
-        rows.push(`<div class="breakdown-row"><span class="breakdown-label">Reducción rend. trabajo (art. 20)</span><span class="breakdown-value positive">− ${fmt(data.reduccionTrabajo)}</span></div>`);
+        rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Reducción rend. trabajo (art. 20)</span><span class="breakdown-value positive">− ${fmt(data.reduccionTrabajo)}</span></div>`);
       }
 
       if (data.efectoMinimo > 0) {
-        rows.push(`<div class="breakdown-row"><span class="breakdown-label">Efecto mínimo personal y familiar</span><span class="breakdown-value positive">− ${fmt(data.efectoMinimo)}</span></div>`);
+        rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Efecto mínimo personal y familiar</span><span class="breakdown-value positive">− ${fmt(data.efectoMinimo)}</span></div>`);
       }
 
       if (data.deduccionCeutaMelilla > 0) {
-        rows.push(`<div class="breakdown-row"><span class="breakdown-label">Deducción Ceuta/Melilla (60%)</span><span class="breakdown-value positive">− ${fmt(data.deduccionCeutaMelilla)}</span></div>`);
+        rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Deducción Ceuta/Melilla (60%)</span><span class="breakdown-value positive">− ${fmt(data.deduccionCeutaMelilla)}</span></div>`);
       }
 
       if (data.deduccionRentasBajas > 0) {
-        rows.push(`<div class="breakdown-row"><span class="breakdown-label">Deducción rentas bajas 2026</span><span class="breakdown-value positive">− ${fmt(data.deduccionRentasBajas)}</span></div>`);
+        rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Deducción rentas bajas 2026</span><span class="breakdown-value positive">− ${fmt(data.deduccionRentasBajas)}</span></div>`);
+      }
+
+      if (data.deduccionFamiliaNumerosa > 0) {
+        const esEspecial = data.deduccionFamiliaNumerosaTipo === 'especial';
+        const hijosExtra = data.deduccionFamiliaNumerosaHijosExtraCount || 0;
+        const hijosExtraLabel = hijosExtra > 0
+          ? ` (+ ${hijosExtra} ${hijosExtra === 1 ? 'hijo extra' : 'hijos extra'})`
+          : '';
+        const aplicadoEnCuota = data.deduccionFamiliaNumerosa < data.deduccionFamiliaNumerosaPotencial
+          ? ' aplicada en cuota'
+          : '';
+        rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Deducción familia numerosa${esEspecial ? ' especial' : ''}${hijosExtraLabel}${aplicadoEnCuota}</span><span class="breakdown-value positive">− ${fmt(data.deduccionFamiliaNumerosa)}</span></div>`);
+      }
+
+      return rows.join('');
+    }
+
+    function renderSocialSecurityRows(data) {
+      const rows = [];
+
+      if (Math.abs(data.ssBaseAnual - data.g) > 0.5) {
+        const ajustes = [];
+
+        if (data.ssMinBaseAplicada) ajustes.push('base mínima');
+        if (data.ssMaxBaseAplicada) ajustes.push('tope máximo');
+
+        rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Base de cotización estimada${ajustes.length ? ` (${ajustes.join(' y ')})` : ''}</span><span class="breakdown-value">${fmt(data.ssBaseAnual)}</span></div>`);
+      }
+
+      rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Contingencias comunes (4,70%)</span><span class="breakdown-value negative">− ${fmt(data.ssContingenciasComunes)}</span></div>`);
+      rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Desempleo (${pctRate(data.ssDesempleoRate)})</span><span class="breakdown-value negative">− ${fmt(data.ssDesempleo)}</span></div>`);
+      rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Formación profesional (0,10%)</span><span class="breakdown-value negative">− ${fmt(data.ssFormacion)}</span></div>`);
+      rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">MEI (0,15%)</span><span class="breakdown-value negative">− ${fmt(data.ssMEI)}</span></div>`);
+
+      if (data.ssSolidaridad > 0) {
+        rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Cuota de solidaridad 2026</span><span class="breakdown-value negative">− ${fmt(data.ssSolidaridad)}</span></div>`);
       }
 
       return rows.join('');
@@ -1389,12 +1885,48 @@
       `).join('');
     }
 
+    function renderSimpleOptions(options, selectedValue) {
+      return options.map(option => `<option value="${option.value}" ${selectedValue === option.value ? 'selected' : ''}>${option.label}</option>`).join('');
+    }
+
+    function getChildrenSelectValue(hijos) {
+      return normalizaNumeroHijos(hijos) >= 5 ? '5+' : String(normalizaNumeroHijos(hijos));
+    }
+
+    function renderChildrenOptions(hijos) {
+      const selectedValue = getChildrenSelectValue(hijos);
+      const options = [
+        { value: '0', label: '0 hijos' },
+        { value: '1', label: '1 hijo' },
+        { value: '2', label: '2 hijos' },
+        { value: '3', label: '3 hijos' },
+        { value: '4', label: '4 hijos' },
+        { value: '5+', label: '5 o más hijos' }
+      ];
+
+      return options.map(option => `<option value="${option.value}" ${selectedValue === option.value ? 'selected' : ''}>${option.label}</option>`).join('');
+    }
+
+    function calculateDataForGross(gross, state) {
+      return calcularSalario(
+        gross,
+        normalizaNumeroHijos(state.hijos),
+        state.territorio,
+        state.rangoEdad,
+        state.tipoContrato,
+        state.grupoCotizacion,
+        state.familiaNumerosa,
+        state.discapacidad,
+        state.movilidadReducida
+      );
+    }
+
     function calculateDataForState(state) {
-      return calcularSalario(state.bruto, state.hijos, state.territorio, state.rangoEdad);
+      return calculateDataForGross(state.bruto, state);
     }
 
     function getMaxNetTargetPerPay(state) {
-      const maxData = calcularSalario(MAX_SUPPORTED_GROSS, state.hijos, state.territorio, state.rangoEdad);
+      const maxData = calculateDataForGross(MAX_SUPPORTED_GROSS, state);
       return Math.max(0, Math.floor(maxData.net / state.pagas));
     }
 
@@ -1414,12 +1946,12 @@
         MAX_SUPPORTED_GROSS,
         Math.max(BASE_GROSS_RANGE_MAX, roundUpToStep(targetAnnualNet, GROSS_INPUT_STEP))
       );
-      let highNet = calcularSalario(high, state.hijos, state.territorio, state.rangoEdad).net;
+      let highNet = calculateDataForGross(high, state).net;
 
       while (high < MAX_SUPPORTED_GROSS && highNet < targetAnnualNet) {
         low = high;
         high = Math.min(MAX_SUPPORTED_GROSS, high * 2);
-        highNet = calcularSalario(high, state.hijos, state.territorio, state.rangoEdad).net;
+        highNet = calculateDataForGross(high, state).net;
       }
 
       let bestGross = high;
@@ -1427,7 +1959,7 @@
 
       for (let iteration = 0; iteration < 40; iteration += 1) {
         const mid = (low + high) / 2;
-        const midNet = calcularSalario(mid, state.hijos, state.territorio, state.rangoEdad).net;
+        const midNet = calculateDataForGross(mid, state).net;
         const midDiff = Math.abs(midNet - targetAnnualNet);
 
         if (midDiff < bestDiff) {
@@ -1454,7 +1986,7 @@
       let closestDiff = Infinity;
 
       candidateGrosses.forEach((candidateGross) => {
-        const candidateNet = calcularSalario(candidateGross, state.hijos, state.territorio, state.rangoEdad).net;
+        const candidateNet = calculateDataForGross(candidateGross, state).net;
         const candidateDiff = Math.abs(candidateNet - targetAnnualNet);
 
         if (candidateDiff < closestDiff) {
@@ -1530,6 +2062,11 @@
         hijos: 0,
         territorio: 'andalucia',
         rangoEdad: 'menor65',
+        tipoContrato: 'indefinido',
+        grupoCotizacion: '1',
+        familiaNumerosa: 'ninguna',
+        discapacidad: 'ninguna',
+        movilidadReducida: false,
         netoObjetivoPaga: 0,
         ...overrides
       };
@@ -1539,8 +2076,8 @@
     let salaryInputMode = 'gross';
     let compareCalculatorCount = MIN_COMPARE_CALCULATORS;
     let calculators = [
-      createCalculatorState({ bruto: 32400, pagas: 12, territorio: 'andalucia' }),
-      createCalculatorState({ bruto: 41600, pagas: 14, territorio: 'castilla_mancha' })
+      createCalculatorState({ bruto: 32400, pagas: 12 }),
+      createCalculatorState({ bruto: 41600, pagas: 12 })
     ];
 
     calculators.forEach((state) => {
@@ -1549,8 +2086,7 @@
 
     function ensureCalculator(calcIndex) {
       if (!calculators[calcIndex]) {
-        const previousState = calculators[calcIndex - 1] ? { ...calculators[calcIndex - 1] } : {};
-        const nextState = createCalculatorState(previousState);
+        const nextState = createCalculatorState();
 
         if (!Number.isFinite(nextState.netoObjetivoPaga) || nextState.netoObjetivoPaga < 0) {
           syncNetTargetFromGross(nextState);
@@ -1612,8 +2148,13 @@
       const salaryRangeId = `${calcId}-salary-range`;
       const salaryInputId = `${calcId}-salary-input`;
       const territorySelectId = `${calcId}-territory`;
+      const contractSelectId = `${calcId}-contract`;
+      const groupSelectId = `${calcId}-group`;
       const childrenSelectId = `${calcId}-children`;
+      const childrenExactId = `${calcId}-children-exact`;
       const ageSelectId = `${calcId}-age`;
+      const familyNumerosaSelectId = `${calcId}-large-family`;
+      const disabilitySelectId = `${calcId}-disability`;
 
       return `
         <div class="calculator" data-calc-index="${calcIndex}">
@@ -1643,9 +2184,33 @@
               </select>
             </div>
             <div class="inline-select inline-gap">
-              <label for="${childrenSelectId}">👶 Número de hijos (menores de 25):</label>
-              <select id="${childrenSelectId}" class="children-select" data-calc-index="${calcIndex}">
-                ${[0, 1, 2, 3, 4, 5].map(n => `<option value="${n}" ${state.hijos === n ? 'selected' : ''}>${n} ${n === 1 ? 'hijo' : 'hijos'}</option>`).join('')}
+              <label for="${contractSelectId}">💼 Tipo de contrato:</label>
+              <select id="${contractSelectId}" class="contract-select" data-calc-index="${calcIndex}">
+                ${renderSimpleOptions(CONTRACT_TYPES, state.tipoContrato)}
+              </select>
+            </div>
+            <div class="inline-select inline-gap">
+              <label for="${groupSelectId}">🧾 Grupo de cotización:</label>
+              <select id="${groupSelectId}" class="group-select" data-calc-index="${calcIndex}">
+                ${renderSimpleOptions(CONTRIBUTION_GROUPS, state.grupoCotizacion)}
+              </select>
+            </div>
+            <div class="inline-select inline-gap children-field-group">
+              <div class="children-main-row">
+                <label for="${childrenSelectId}">👶 Número de hijos (menores de 25):</label>
+                <select id="${childrenSelectId}" class="children-select" data-calc-index="${calcIndex}">
+                  ${renderChildrenOptions(state.hijos)}
+                </select>
+              </div>
+              <div class="children-exact-wrapper" ${normalizaNumeroHijos(state.hijos) >= 5 ? '' : 'hidden'}>
+                <label for="${childrenExactId}">Si son 5 o más, número exacto:</label>
+                <input id="${childrenExactId}" type="number" min="5" step="1" value="${Math.max(5, normalizaNumeroHijos(state.hijos))}" class="children-exact-input" data-calc-index="${calcIndex}" inputmode="numeric">
+              </div>
+            </div>
+            <div class="inline-select inline-gap">
+              <label for="${familyNumerosaSelectId}">👪 Familia numerosa:</label>
+              <select id="${familyNumerosaSelectId}" class="family-large-select" data-calc-index="${calcIndex}">
+                ${renderSimpleOptions(FAMILY_NUMEROSA_OPTIONS, normalizaFamiliaNumerosa(state.familiaNumerosa))}
               </select>
             </div>
             <div class="inline-select inline-gap">
@@ -1656,8 +2221,14 @@
                 <option value="75+" ${state.rangoEdad === '75+' ? 'selected' : ''}>75 años o más</option>
               </select>
             </div>
+            <div class="inline-select inline-gap">
+              <label for="${disabilitySelectId}">♿ Discapacidad:</label>
+              <select id="${disabilitySelectId}" class="disability-select" data-calc-index="${calcIndex}">
+                ${renderSimpleOptions(DISABILITY_OPTIONS, normalizaDiscapacidad(state.discapacidad, state.movilidadReducida))}
+              </select>
+            </div>
             <div class="inline-select helper-text">
-              💡 A partir de 65 años se añaden 1.150€ al mínimo personal. A partir de 75 años el mínimo total es 8.100€.
+              💡 Supuestos 2026: trabajador por cuenta ajena en Régimen General durante todo el año. La base mínima de grupo se aplica asumiendo jornada completa; no se modelan horas extra, retribución flexible ni contrato formativo en alternancia. La deducción por familia numerosa se activa manualmente y aproxima su límite por cotizaciones con la cuota obrera calculada; no se modelan abono anticipado, cesiones ni devoluciones por encima de cuota.
             </div>
           </div>
 
@@ -1677,9 +2248,24 @@
 
           <div class="breakdown">
             <div class="breakdown-row"><span class="breakdown-label">Salario bruto anual</span><span class="breakdown-value breakdown-g">${fmt(data.g)}</span></div>
-            <div class="breakdown-row"><span class="breakdown-label">Cotización SS</span><span class="breakdown-value negative breakdown-ss">− ${fmt(data.ss)} (${pct(data.sp)})</span></div>
-            <div class="breakdown-row"><span class="breakdown-label">IRPF final estimado</span><span class="breakdown-value negative breakdown-tax">− ${fmt(data.tax)} (${pct(data.ip)})</span></div>
-            <div class="deduction-rows">${renderDeductionRows(data)}</div>
+            <details class="breakdown-details social-security-details">
+              <summary class="breakdown-row breakdown-summary">
+                <span class="breakdown-summary-content">
+                  <span class="breakdown-summary-main"><span class="breakdown-label">Cotización SS trabajador</span><span class="breakdown-value negative breakdown-ss">− ${fmt(data.ss)} (${pct(data.sp)})</span></span>
+                  <span class="breakdown-chevron" aria-hidden="true">▾</span>
+                </span>
+              </summary>
+              <div class="breakdown-dropdown-content social-security-rows">${renderSocialSecurityRows(data)}</div>
+            </details>
+            <details class="breakdown-details tax-details">
+              <summary class="breakdown-row breakdown-summary">
+                <span class="breakdown-summary-content">
+                  <span class="breakdown-summary-main"><span class="breakdown-label">IRPF final estimado</span><span class="breakdown-value negative breakdown-tax">− ${fmt(data.tax)} (${pct(data.ip)})</span></span>
+                  <span class="breakdown-chevron" aria-hidden="true">▾</span>
+                </span>
+              </summary>
+              <div class="breakdown-dropdown-content deduction-rows">${renderDeductionRows(data)}</div>
+            </details>
             <div class="breakdown-row"><span class="breakdown-label bold">Salario neto anual</span><span class="breakdown-value positive breakdown-net">${fmt(data.net)}</span></div>
           </div>
 
@@ -1739,6 +2325,30 @@
         inputModeResult.querySelector('.input-mode-result-value').textContent = salaryInputConfig.estimateValue;
       }
 
+      const contractSelect = calcDiv.querySelector('.contract-select');
+      if (contractSelect) contractSelect.value = state.tipoContrato;
+
+      const groupSelect = calcDiv.querySelector('.group-select');
+      if (groupSelect) groupSelect.value = state.grupoCotizacion;
+
+      const childrenSelect = calcDiv.querySelector('.children-select');
+      if (childrenSelect) childrenSelect.value = getChildrenSelectValue(state.hijos);
+
+      const childrenExactWrapper = calcDiv.querySelector('.children-exact-wrapper');
+      const childrenExactInput = calcDiv.querySelector('.children-exact-input');
+      if (childrenExactWrapper) {
+        childrenExactWrapper.hidden = normalizaNumeroHijos(state.hijos) < 5;
+      }
+      if (childrenExactInput) {
+        childrenExactInput.value = Math.max(5, normalizaNumeroHijos(state.hijos));
+      }
+
+      const familyLargeSelect = calcDiv.querySelector('.family-large-select');
+      if (familyLargeSelect) familyLargeSelect.value = normalizaFamiliaNumerosa(state.familiaNumerosa);
+
+      const disabilitySelect = calcDiv.querySelector('.disability-select');
+      if (disabilitySelect) disabilitySelect.value = normalizaDiscapacidad(state.discapacidad, state.movilidadReducida);
+
       calcDiv.querySelector('.metric-net').textContent = fmt(data.net);
       calcDiv.querySelector('.metric-net-label').textContent = pct(data.np) + ' del bruto';
       calcDiv.querySelector('.metric-netpay').textContent = fmt(nm);
@@ -1748,6 +2358,7 @@
       calcDiv.querySelector('.metric-total').textContent = pct(data.eff);
       calcDiv.querySelector('.breakdown-g').textContent = fmt(data.g);
       calcDiv.querySelector('.breakdown-ss').innerHTML = `− ${fmt(data.ss)} (${pct(data.sp)})`;
+      calcDiv.querySelector('.social-security-rows').innerHTML = renderSocialSecurityRows(data);
       calcDiv.querySelector('.breakdown-tax').innerHTML = `− ${fmt(data.tax)} (${pct(data.ip)})`;
       calcDiv.querySelector('.deduction-rows').innerHTML = renderDeductionRows(data);
       calcDiv.querySelector('.breakdown-net').textContent = fmt(data.net);
@@ -1818,10 +2429,42 @@
           updateCalculatorUI(calcIndex);
         });
       });
+      document.querySelectorAll('.contract-select').forEach(sel => {
+        sel.addEventListener('change', function () {
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].tipoContrato = this.value;
+          updateCalculatorUI(calcIndex);
+        });
+      });
+      document.querySelectorAll('.group-select').forEach(sel => {
+        sel.addEventListener('change', function () {
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].grupoCotizacion = this.value;
+          updateCalculatorUI(calcIndex);
+        });
+      });
       document.querySelectorAll('.children-select').forEach(sel => {
         sel.addEventListener('change', function () {
           const calcIndex = Number(this.dataset.calcIndex);
-          calculators[calcIndex].hijos = parseInt(this.value, 10);
+          if (this.value === '5+') {
+            calculators[calcIndex].hijos = Math.max(5, normalizaNumeroHijos(calculators[calcIndex].hijos) || 5);
+          } else {
+            calculators[calcIndex].hijos = parseInt(this.value, 10);
+          }
+          updateCalculatorUI(calcIndex);
+        });
+      });
+      document.querySelectorAll('.children-exact-input').forEach(input => {
+        input.addEventListener('input', function () {
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].hijos = Math.max(5, normalizaNumeroHijos(this.value) || 5);
+          updateCalculatorUI(calcIndex);
+        });
+      });
+      document.querySelectorAll('.family-large-select').forEach(sel => {
+        sel.addEventListener('change', function () {
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].familiaNumerosa = this.value;
           updateCalculatorUI(calcIndex);
         });
       });
@@ -1829,6 +2472,14 @@
         sel.addEventListener('change', function () {
           const calcIndex = Number(this.dataset.calcIndex);
           calculators[calcIndex].rangoEdad = this.value;
+          updateCalculatorUI(calcIndex);
+        });
+      });
+      document.querySelectorAll('.disability-select').forEach(sel => {
+        sel.addEventListener('change', function () {
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].discapacidad = this.value;
+          calculators[calcIndex].movilidadReducida = tieneMovilidadReducidaOAsistencia(this.value);
           updateCalculatorUI(calcIndex);
         });
       });
