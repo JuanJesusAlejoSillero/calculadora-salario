@@ -2930,13 +2930,17 @@
       calcDiv.querySelector('.salary-display').textContent = salaryInputConfig.displayValue;
       const salaryInput = calcDiv.querySelector('.salary-input');
       if (salaryInput) {
-        salaryInput.value = salaryInputConfig.inputValue;
+        if (document.activeElement !== salaryInput) {
+          salaryInput.value = salaryInputConfig.inputValue;
+        }
         salaryInput.max = salaryInputConfig.inputMax;
         salaryInput.step = salaryInputConfig.inputStep;
       }
       const rangeInput = calcDiv.querySelector('.salary-range');
       if (rangeInput) {
-        rangeInput.value = salaryInputConfig.rangeValue;
+        if (document.activeElement !== rangeInput) {
+          rangeInput.value = salaryInputConfig.rangeValue;
+        }
         rangeInput.max = salaryInputConfig.rangeMax;
         rangeInput.step = salaryInputConfig.rangeStep;
       }
@@ -2955,7 +2959,11 @@
       if (groupSelect) groupSelect.value = state.grupoCotizacion;
 
       const atEpInput = calcDiv.querySelector('.company-atep-input');
-      if (atEpInput) atEpInput.value = formatPercentageInput(state.primaAtep);
+      if (atEpInput) {
+        if (document.activeElement !== atEpInput) {
+          atEpInput.value = formatPercentageInput(state.primaAtep);
+        }
+      }
 
       const childrenSelect = calcDiv.querySelector('.children-select');
       if (childrenSelect) childrenSelect.value = getChildrenSelectValue(state.hijos);
@@ -2964,6 +2972,8 @@
       const childrenExactInput = calcDiv.querySelector('.children-exact-input');
       if (childrenExactWrapper) {
         childrenExactWrapper.hidden = normalizaNumeroHijos(state.hijos) < 5;
+      } if (document.activeElement !== childrenExactInput) {
+        childrenExactInput.value = Math.max(5, normalizaNumeroHijos(state.hijos));
       }
       if (childrenExactInput) {
         childrenExactInput.value = Math.max(5, normalizaNumeroHijos(state.hijos));
@@ -2988,8 +2998,12 @@
 
       const withholdingRateInput = calcDiv.querySelector('.withholding-rate-input');
       if (withholdingRateInput) {
-        withholdingRateInput.value = formatRetencionInput(state.retencionPctPersonalizada);
+        if (document.activeElement !== withholdingRateInput) {
+          withholdingRateInput.value = formatRetencionInput(state.retencionPctPersonalizada);
+        }
       }
+
+      calcDiv.querySelector('.metric-net').textContent = fmt(data.net);
 
       calcDiv.querySelector('.metric-net').textContent = fmt(data.net);
       calcDiv.querySelector('.metric-net-label').textContent = pct(data.np) + ' del bruto';
