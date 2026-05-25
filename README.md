@@ -1,6 +1,6 @@
-# 💰 Calculadora Salario España 2026
+# 💰 Calculadora de Salario + Cotizaciones
 
-- [💰 Calculadora Salario España 2026](#-calculadora-salario-españa-2026)
+- [💰 Calculadora de Salario + Cotizaciones](#-calculadora-de-salario--cotizaciones)
   - [⚠️ Descargo de responsabilidad](#️-descargo-de-responsabilidad)
   - [🚀 Uso](#-uso)
   - [🧮 Características](#-características)
@@ -8,7 +8,7 @@
   - [🤝 Cómo contribuir](#-cómo-contribuir)
   - [📄 Licencia](#-licencia)
 
-Calculadora web para estimar el salario bruto, el salario neto anual y por paga y el coste empresa aproximado en España, con modo individual o comparativo entre varios escenarios.
+Calculadora web para estimar el salario bruto, el salario neto anual y por paga y el coste empresa aproximado en España, con modo individual y comparativo entre varios escenarios.
 
 La aplicación **funciona completamente offline y es 100% privada**: todos los cálculos se realizan en el lado del cliente, es decir, en tu navegador, sin enviar ni recibir datos de servidores externos.
 
@@ -76,7 +76,7 @@ El resultado mostrado es una estimación orientativa del neto anual, del neto po
 
 Originalmente hice esta herramienta para uso privado pero creo que puede ser de utilidad a otros, por eso decidí publicarla.
 
-Si detectas un problema o quieres proponer una mejora, te animo a abrir una [pull request](https://github.com/JuanJesusAlejoSillero/calculadora-salario/pulls) con los cambios que harías o una [issue](https://github.com/JuanJesusAlejoSillero/calculadora-salario/issues) con el problema encontrado.
+Si detectas un problema o quieres proponer una mejora, te animo a abrir una [pull request](https://github.com/JuanJesusAlejoSillero/calculadora-salario/pulls) con los cambios que harías o una [issue](https://github.com/JuanJesusAlejoSillero/calculadora-salario/issues) describiendo el problema encontrado.
 
 **¡Muchas gracias!**
 
