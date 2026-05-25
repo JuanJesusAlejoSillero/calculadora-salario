@@ -29,8 +29,9 @@ Los resultados proporcionados por la herramienta son **meramente orientativos** 
 4. Selecciona el territorio, el tipo de contrato, el grupo de cotización, la prima AT/EP aplicable, el número de hijos, si aplica familia numerosa, la edad y la situación de discapacidad.
 5. Si seleccionas `5 o más hijos`, introduce además el número exacto para no perder el mínimo por descendientes adicional.
 6. Elige el número de pagas al año.
+7. Deja `Retención en nómina` en `Calculada` para usar la estimación automática, o cambia a `Personalizada` e introduce el porcentaje si quieres simular una retención distinta.
 
-La calculadora recuerda automáticamente en el mismo navegador el tema, el modo `bruto anual` o `neto por paga`, el modo `Calcular` o `Comparar salarios`, el número de escenarios visibles y los últimos importes y perfiles fiscales/laborales introducidos en cada escenario.
+La calculadora recuerda automáticamente en el mismo navegador el tema, el modo `bruto anual` o `neto por paga`, el modo `Calcular` o `Comparar salarios`, el número de escenarios visibles y los últimos importes, perfiles fiscales/laborales y ajustes de retención introducidos en cada escenario.
 
 En 12 pagas, el modo inverso interpreta la entrada como **neto mensual**. Si eliges 13, 14, 15 o 16 pagas, la entrada se interpreta como **neto por paga** para mantener la coherencia del cálculo anual.
 
@@ -52,6 +53,8 @@ Si lo deseas, puedes activar el modo **Comparar salarios** para ver entre 2 y 10
 - Tratamiento de discapacidad del contribuyente con tramos `33% al 64%`, `33% al 64% con movilidad reducida o asistencia` y `65% o más`.
 - Reducción por obtención de rendimientos del trabajo y gasto deducible adicional para trabajador activo con discapacidad.
 - Deducción adicional en cuota para rentas bajas vinculada al SMI 2026.
+- Retención en nómina configurable en modo calculada o personalizada para simular solicitudes voluntarias al pagador.
+- Separación entre `IRPF final estimado` y `retención aplicada en nómina`, con ajuste estimado en la renta cuando no coinciden.
 - Modo comparación para evaluar entre 2 y 10 escenarios simultáneos.
 - Tema oscuro y claro y detección automática del modo preferido en la primera visita.
 - Persistencia local automática del último estado de uso: modo salarial, modo simple o comparativo, número de escenarios y valores introducidos en cada calculadora.
@@ -69,9 +72,10 @@ La calculadora aplica un modelo aproximado:
 - Reducción por obtención de rendimientos del trabajo según el artículo 20 de la LIRPF para salarios bajos.
 - El mínimo personal y familiar no se resta de la base sin más: se calcula la cuota completa y se descuenta el efecto del mínimo en cuota, como hace la LIRPF.
 - Cuota IRPF calculada como suma de la escala estatal y la escala autonómica o foral seleccionada, incluyendo el tratamiento específico de Ceuta y Melilla.
+- La `retención en nómina` puede seguir una estimación calculada a partir de la carga fiscal anual o fijarse manualmente como porcentaje del bruto para simular una retención inferior o superior; esto afecta al neto cobrado por paga y a la regularización estimada en la renta, pero no cambia el `IRPF final estimado`.
 - Deducción adicional en cuota para rentas bajas en 2026: 590,89 € hasta 17.094 € y reducción lineal hasta 20.048,45 €.
 - Deducción por familia numerosa general o especial con 600 € extra por cada hijo que exceda el umbral estándar de la categoría; el límite por cotizaciones se aproxima con la cuota obrera calculada y no se modelan abono anticipado, cesiones ni devoluciones por encima de cuota.
-- Cuando partes de un neto por paga, el bruto anual se estima con una búsqueda binaria sobre la misma función `IRPF + Seguridad Social` que usa el cálculo directo, evitando desajustes entre ambos modos.
+- Cuando partes de un neto por paga, el bruto anual se estima con una búsqueda binaria sobre la misma función de `Seguridad Social + retención aplicada en nómina` que utiliza la vista de resultados, evitando desajustes entre el modo inverso y el neto por paga mostrado.
 
 El resultado mostrado es una estimación orientativa del neto anual, del neto por paga y de los porcentajes efectivos de cotización e IRPF.
 

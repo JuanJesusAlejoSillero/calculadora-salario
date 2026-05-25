@@ -219,6 +219,48 @@
       background: var(--accent-blue-hover);
     }
 
+    .retention-mode-selector {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem;
+      border: 1px solid var(--border-color);
+      border-radius: 40px;
+      background: var(--bg-secondary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .retention-mode-btn {
+      border: 0;
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .retention-mode-btn:hover {
+      color: var(--accent-blue);
+      background: rgba(108, 71, 255, 0.1);
+    }
+
+    .retention-mode-btn.active,
+    .retention-mode-btn[aria-pressed="true"] {
+      background: var(--accent-blue);
+      color: white;
+      box-shadow: 0 2px 6px rgba(108, 71, 255, 0.25);
+    }
+
+    .retention-mode-btn:hover[aria-pressed="true"] {
+      color: white;
+      background: var(--accent-blue-hover);
+    }
+
     .mode-selector {
       display: flex;
       gap: 0.75rem;
@@ -580,6 +622,46 @@
       gap: 0.45rem;
     }
 
+    .retention-inline-control {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .retention-manual-input {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.75rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .retention-manual-input[hidden] {
+      display: none;
+    }
+
+    .withholding-rate-input {
+      width: 5.25rem;
+      padding: 0;
+      border: none;
+      background: transparent;
+      text-align: right;
+      box-shadow: none;
+    }
+
+    .withholding-rate-input:focus {
+      outline: none;
+      border-color: transparent;
+      box-shadow: none;
+    }
+
     .company-atep-input {
       width: 6.75rem;
       text-align: right;
@@ -617,6 +699,14 @@
 
     .metric-value.negative {
       color: var(--accent-red);
+    }
+
+    .metric-value.positive {
+      color: var(--accent-green);
+    }
+
+    .metric-value.neutral {
+      color: var(--text-primary);
     }
 
     .metric-sublabel {
@@ -808,7 +898,7 @@
 
     .paycheck-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       text-align: center;
     }
@@ -837,6 +927,32 @@
 
     .paycheck-item-value.positive {
       color: var(--accent-green);
+    }
+
+    .paycheck-summary {
+      display: grid;
+      gap: 0.35rem;
+      margin-top: 0.9rem;
+      padding-top: 0.9rem;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .paycheck-summary strong {
+      font-weight: 600;
+    }
+
+    .paycheck-summary.neutral strong {
+      color: var(--text-primary);
+    }
+
+    .paycheck-summary.positive strong {
+      color: var(--accent-green);
+    }
+
+    .paycheck-summary.negative strong {
+      color: var(--accent-red);
     }
 
     .note {
@@ -938,6 +1054,21 @@
         justify-content: center;
         display: inline-flex;
         width: auto;
+      }
+
+      .retention-inline-control {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .retention-mode-selector {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .retention-mode-btn {
+        flex: 1 1 auto;
+        text-align: center;
       }
 
       .salary-mode-selector {
@@ -1593,6 +1724,102 @@
       return normalized.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
     }
 
+    function normalizaModoRetencion(modoRetencion) {
+      return modoRetencion === 'personalizada' ? 'personalizada' : 'oficial';
+    }
+
+    function normalizaRetencionPersonalizada(retencionPersonalizada) {
+      const valor = typeof retencionPersonalizada === 'string'
+        ? Number(retencionPersonalizada.replace(',', '.'))
+        : Number(retencionPersonalizada);
+
+      if (!Number.isFinite(valor)) {
+        return 0;
+      }
+
+      return Math.min(60, Math.max(0, Number(valor.toFixed(2))));
+    }
+
+    function formatRetencionInput(value) {
+      const normalized = normalizaRetencionPersonalizada(value);
+
+      if (Number.isInteger(normalized)) {
+        return String(normalized);
+      }
+
+      return normalized.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+    }
+
+    function calcularRetencionNomina(data, state) {
+      const tasaOficial = data.g > 0 ? data.tax / data.g : 0;
+      const modoRetencion = normalizaModoRetencion(state.retencionMode);
+      const tasaAplicada = modoRetencion === 'personalizada'
+        ? normalizaRetencionPersonalizada(state.retencionPctPersonalizada) / 100
+        : tasaOficial;
+      const retencionAnual = data.g * tasaAplicada;
+      const brutoPorPaga = state.pagas > 0 ? data.g / state.pagas : 0;
+      const ssPorPaga = state.pagas > 0 ? data.ss / state.pagas : 0;
+      const retencionPorPaga = state.pagas > 0 ? retencionAnual / state.pagas : 0;
+      const deduccionesPorPaga = ssPorPaga + retencionPorPaga;
+      const netoPorPaga = brutoPorPaga - deduccionesPorPaga;
+      const netoAnualNomina = data.g - data.ss - retencionAnual;
+      const ajusteAnual = data.tax - retencionAnual;
+
+      return {
+        modoRetencion,
+        tasaOficial,
+        tasaAplicada,
+        retencionAnual,
+        brutoPorPaga,
+        ssPorPaga,
+        retencionPorPaga,
+        deduccionesPorPaga,
+        netoPorPaga,
+        netoAnualNomina,
+        ajusteAnual
+      };
+    }
+
+    function getAdjustmentMetricClass(ajusteAnual) {
+      if (Math.abs(ajusteAnual) < 0.5) {
+        return 'neutral';
+      }
+
+      return ajusteAnual > 0 ? 'negative' : 'positive';
+    }
+
+    function getAdjustmentLabel(ajusteAnual) {
+      if (Math.abs(ajusteAnual) < 0.5) {
+        return 'Sin ajuste con la retención actual';
+      }
+
+      return ajusteAnual > 0
+        ? 'A ingresar si mantienes esta retención'
+        : 'A devolver si mantienes esta retención';
+    }
+
+    function getAdjustmentSummaryHtml(ajusteAnual) {
+      if (Math.abs(ajusteAnual) < 0.5) {
+        return 'Sin regularización estimada si mantienes esta retención.';
+      }
+
+      if (ajusteAnual > 0) {
+        return `Regularización estimada: <strong>${fmt(ajusteAnual)}</strong> a ingresar en la renta.`;
+      }
+
+      return `Regularización estimada: <strong>${fmt(Math.abs(ajusteAnual))}</strong> a devolver en la renta.`;
+    }
+
+    function getRetentionModeDisplayLabel(modoRetencion) {
+      return modoRetencion === 'personalizada' ? 'Personalizada' : 'Calculada';
+    }
+
+    function getPaycheckHelperText(modoRetencion) {
+      return modoRetencion === 'personalizada'
+        ? 'La retención aplicada en nómina puede diferir del IRPF final estimado y provocar una regularización en la renta.'
+        : 'Referencia anual media: las pagas extra pueden tener retenciones distintas.';
+    }
+
     function calcularCuotaSolidaridad(brutoAnual, rates) {
       const limiteTramo1 = SS_BASE_MAX_ANUAL * 1.1;
       const limiteTramo2 = SS_BASE_MAX_ANUAL * 1.5;
@@ -2105,7 +2332,8 @@
 
     function getMaxNetTargetPerPay(state) {
       const maxData = calculateDataForGross(MAX_SUPPORTED_GROSS, state);
-      return Math.max(0, Math.floor(maxData.net / state.pagas));
+      const payrollData = calcularRetencionNomina(maxData, state);
+      return Math.max(0, Math.floor(payrollData.netoPorPaga));
     }
 
     function clampNetTargetPerPay(value, state) {
@@ -2124,28 +2352,28 @@
         MAX_SUPPORTED_GROSS,
         Math.max(BASE_GROSS_RANGE_MAX, roundUpToStep(targetAnnualNet, GROSS_INPUT_STEP))
       );
-      let highNet = calculateDataForGross(high, state).net;
+      let highNet = calcularRetencionNomina(calculateDataForGross(high, state), state).netoPorPaga;
 
-      while (high < MAX_SUPPORTED_GROSS && highNet < targetAnnualNet) {
+      while (high < MAX_SUPPORTED_GROSS && highNet < targetNetPerPay) {
         low = high;
         high = Math.min(MAX_SUPPORTED_GROSS, high * 2);
-        highNet = calculateDataForGross(high, state).net;
+        highNet = calcularRetencionNomina(calculateDataForGross(high, state), state).netoPorPaga;
       }
 
       let bestGross = high;
-      let bestDiff = Math.abs(highNet - targetAnnualNet);
+      let bestDiff = Math.abs(highNet - targetNetPerPay);
 
       for (let iteration = 0; iteration < 40; iteration += 1) {
         const mid = (low + high) / 2;
-        const midNet = calculateDataForGross(mid, state).net;
-        const midDiff = Math.abs(midNet - targetAnnualNet);
+        const midNet = calcularRetencionNomina(calculateDataForGross(mid, state), state).netoPorPaga;
+        const midDiff = Math.abs(midNet - targetNetPerPay);
 
         if (midDiff < bestDiff) {
           bestDiff = midDiff;
           bestGross = mid;
         }
 
-        if (midNet < targetAnnualNet) {
+        if (midNet < targetNetPerPay) {
           low = mid;
         } else {
           high = mid;
@@ -2164,8 +2392,8 @@
       let closestDiff = Infinity;
 
       candidateGrosses.forEach((candidateGross) => {
-        const candidateNet = calculateDataForGross(candidateGross, state).net;
-        const candidateDiff = Math.abs(candidateNet - targetAnnualNet);
+        const candidateNet = calcularRetencionNomina(calculateDataForGross(candidateGross, state), state).netoPorPaga;
+        const candidateDiff = Math.abs(candidateNet - targetNetPerPay);
 
         if (candidateDiff < closestDiff) {
           closestDiff = candidateDiff;
@@ -2179,8 +2407,9 @@
     function syncNetTargetFromGross(state) {
       state.bruto = clampAnnualGross(state.bruto);
       const data = calculateDataForState(state);
+      const payrollData = calcularRetencionNomina(data, state);
       state.netoObjetivoPaga = clampNetTargetPerPay(
-        roundToStep(data.net / state.pagas, NET_TARGET_INPUT_STEP),
+        roundToStep(payrollData.netoPorPaga, NET_TARGET_INPUT_STEP),
         state
       );
       return data;
@@ -2246,6 +2475,8 @@
         discapacidad: 'ninguna',
         movilidadReducida: false,
         primaAtep: 0,
+        retencionMode: 'oficial',
+        retencionPctPersonalizada: 0,
         netoObjetivoPaga: 0,
         ...overrides
       };
@@ -2291,6 +2522,8 @@
       state.discapacidad = normalizaDiscapacidad(storedState.discapacidad, storedState.movilidadReducida);
       state.movilidadReducida = tieneMovilidadReducidaOAsistencia(state.discapacidad);
       state.primaAtep = normalizaPrimaAtep(storedState.primaAtep);
+      state.retencionMode = normalizaModoRetencion(storedState.retencionMode);
+      state.retencionPctPersonalizada = normalizaRetencionPersonalizada(storedState.retencionPctPersonalizada);
 
       if (storedState.netoObjetivoPaga !== undefined && storedState.netoObjetivoPaga !== null) {
         state.netoObjetivoPaga = clampNetTargetPerPay(storedState.netoObjetivoPaga, state);
@@ -2312,6 +2545,8 @@
         discapacidad: state.discapacidad,
         movilidadReducida: state.movilidadReducida,
         primaAtep: state.primaAtep,
+        retencionMode: state.retencionMode,
+        retencionPctPersonalizada: state.retencionPctPersonalizada,
         netoObjetivoPaga: state.netoObjetivoPaga
       };
     }
@@ -2420,11 +2655,14 @@
     function renderCalculator(calcIndex) {
       const state = ensureCalculator(calcIndex);
       const data = recalculateCalculator(calcIndex);
+      const payrollData = calcularRetencionNomina(data, state);
       const calcId = `calc${calcIndex + 1}`;
       const salaryInputConfig = getSalaryInputConfig(state, data, salaryInputMode);
-      const nm = data.net / state.pagas;
-      const gm = data.g / state.pagas;
-      const dm = (data.ss + data.tax) / state.pagas;
+      const nm = payrollData.netoPorPaga;
+      const gm = payrollData.brutoPorPaga;
+      const ssm = payrollData.ssPorPaga;
+      const rm = payrollData.retencionPorPaga;
+      const adjustmentMetricClass = getAdjustmentMetricClass(payrollData.ajusteAnual);
       const calcTitle = `📊 Escenario ${calcIndex + 1}`;
       const salaryRangeId = `${calcId}-salary-range`;
       const salaryInputId = `${calcId}-salary-input`;
@@ -2437,6 +2675,7 @@
       const ageSelectId = `${calcId}-age`;
       const familyNumerosaSelectId = `${calcId}-large-family`;
       const disabilitySelectId = `${calcId}-disability`;
+      const retentionRateId = `${calcId}-retention-rate`;
 
       return `
         <div class="calculator" data-calc-index="${calcIndex}">
@@ -2516,8 +2755,21 @@
                 ${renderSimpleOptions(DISABILITY_OPTIONS, normalizaDiscapacidad(state.discapacidad, state.movilidadReducida))}
               </select>
             </div>
+            <div class="inline-select inline-gap">
+              <label>🧾 Retención en nómina:</label>
+              <div class="retention-inline-control">
+                <div class="retention-mode-selector" role="group" aria-label="Modo de retención en nómina">
+                  <button type="button" class="retention-mode-btn ${payrollData.modoRetencion === 'oficial' ? 'active' : ''}" data-retencion-mode="oficial" data-calc-index="${calcIndex}" aria-pressed="${payrollData.modoRetencion === 'oficial' ? 'true' : 'false'}">Calculada</button>
+                  <button type="button" class="retention-mode-btn ${payrollData.modoRetencion === 'personalizada' ? 'active' : ''}" data-retencion-mode="personalizada" data-calc-index="${calcIndex}" aria-pressed="${payrollData.modoRetencion === 'personalizada' ? 'true' : 'false'}">Personalizada</button>
+                </div>
+                <div class="retention-manual-input" ${payrollData.modoRetencion === 'personalizada' ? '' : 'hidden'}>
+                  <input id="${retentionRateId}" type="number" min="0" max="60" step="0.1" value="${formatRetencionInput(state.retencionPctPersonalizada)}" class="withholding-rate-input" data-calc-index="${calcIndex}" inputmode="decimal" aria-label="Tipo de retención personalizado">
+                  <span>%</span>
+                </div>
+              </div>
+            </div>
             <div class="inline-select helper-text">
-              💡 Supuestos 2026: trabajador por cuenta ajena en Régimen General durante todo el año. La base mínima de grupo se aplica asumiendo jornada completa; no se modelan horas extra, retribución flexible ni contrato formativo en alternancia. La deducción por familia numerosa se activa manualmente y aproxima su límite por cotizaciones con la cuota obrera calculada; no se modelan abono anticipado, cesiones ni devoluciones por encima de cuota. La prima AT/EP depende de la actividad, CNAE u ocupación, por lo que debes introducirla manualmente: si la dejas en 0%, el coste empresa seguirá sin esa parte.
+              💡 Supuestos 2026: trabajador por cuenta ajena en Régimen General durante todo el año. La base mínima de grupo se aplica asumiendo jornada completa; no se modelan horas extra, retribución flexible ni contrato formativo en alternancia. La deducción por familia numerosa se activa manualmente y aproxima su límite por cotizaciones con la cuota obrera calculada; no se modelan abono anticipado, cesiones ni devoluciones por encima de cuota. La prima AT/EP depende de la actividad, CNAE u ocupación, por lo que debes introducirla manualmente: si la dejas en 0%, el coste empresa seguirá sin esa parte. La retención en nómina puede ajustarse para simular una solicitud voluntaria distinta de la calculada automáticamente; eso modifica el neto cobrado por paga, pero no el IRPF final estimado.
             </div>
           </div>
 
@@ -2529,10 +2781,10 @@
           </div>
 
           <div class="metrics">
-            <div class="metric"><div class="metric-label">Neto anual</div><div class="metric-value metric-net">${fmt(data.net)}</div><div class="metric-sublabel metric-net-label">${pct(data.np)} del bruto</div></div>
-            <div class="metric"><div class="metric-label">Neto por paga</div><div class="metric-value metric-netpay">${fmt(nm)}</div><div class="metric-sublabel metric-netpay-label">${state.pagas} pagas al año</div></div>
-            <div class="metric"><div class="metric-label">Tipo efectivo IRPF</div><div class="metric-value metric-irpf negative">${pct(data.tr)}</div><div class="metric-sublabel metric-irpf-label">${fmt(data.tax)} al año</div></div>
-            <div class="metric"><div class="metric-label">Carga total</div><div class="metric-value metric-total negative">${pct(data.eff)}</div><div class="metric-sublabel">IRPF + SS</div></div>
+            <div class="metric"><div class="metric-label">Neto anual final</div><div class="metric-value metric-net">${fmt(data.net)}</div><div class="metric-sublabel metric-net-label">${pct(data.np)} del bruto</div></div>
+            <div class="metric"><div class="metric-label">Neto por paga</div><div class="metric-value metric-netpay">${fmt(nm)}</div><div class="metric-sublabel metric-netpay-label">${state.pagas} pagas · retención ${pctRate(payrollData.tasaAplicada)}</div></div>
+            <div class="metric"><div class="metric-label">Tipo de retención aplicado</div><div class="metric-value metric-irpf negative">${pctRate(payrollData.tasaAplicada)}</div><div class="metric-sublabel metric-irpf-label">${getRetentionModeDisplayLabel(payrollData.modoRetencion)} · ${fmt(payrollData.retencionAnual)} al año</div></div>
+            <div class="metric"><div class="metric-label">Ajuste estimado en renta</div><div class="metric-value metric-adjustment ${adjustmentMetricClass}">${fmt(Math.abs(payrollData.ajusteAnual))}</div><div class="metric-sublabel metric-adjustment-label">${getAdjustmentLabel(payrollData.ajusteAnual)}</div></div>
           </div>
 
           <div class="breakdown employer-cost-card">
@@ -2568,7 +2820,8 @@
               </summary>
               <div class="breakdown-dropdown-content deduction-rows">${renderDeductionRows(data)}</div>
             </details>
-            <div class="breakdown-row"><span class="breakdown-label bold">Salario neto anual</span><span class="breakdown-value positive breakdown-net">${fmt(data.net)}</span></div>
+            <div class="breakdown-row"><span class="breakdown-label">Retención aplicada en nómina</span><span class="breakdown-value negative breakdown-withholding">− ${fmt(payrollData.retencionAnual)} (${pct(payrollData.tasaAplicada)})</span></div>
+            <div class="breakdown-row"><span class="breakdown-label bold">Salario neto anual final</span><span class="breakdown-value positive breakdown-net">${fmt(data.net)}</span></div>
           </div>
 
           <div class="chart-bar">
@@ -2584,11 +2837,16 @@
 
           <div class="paycheck-breakdown">
             <label class="label">Desglose por paga (${state.pagas} pagas al año)</label>
-            <div class="helper-text">Referencia anual media: las pagas extra pueden tener retenciones distintas.</div>
+            <div class="helper-text paycheck-helper">${getPaycheckHelperText(payrollData.modoRetencion)}</div>
             <div class="paycheck-grid">
               <div class="paycheck-item"><div class="paycheck-item-label">Bruto por paga</div><div class="paycheck-item-value paycheck-gm">${fmt(gm)}</div></div>
-              <div class="paycheck-item"><div class="paycheck-item-label">Deducciones</div><div class="paycheck-item-value negative">− <span class="paycheck-dm">${fmt(dm)}</span></div></div>
+              <div class="paycheck-item"><div class="paycheck-item-label">SS por paga</div><div class="paycheck-item-value negative">− <span class="paycheck-ssm">${fmt(ssm)}</span></div></div>
+              <div class="paycheck-item"><div class="paycheck-item-label">Retención IRPF</div><div class="paycheck-item-value negative">− <span class="paycheck-rm">${fmt(rm)}</span></div></div>
               <div class="paycheck-item"><div class="paycheck-item-label">Neto por paga</div><div class="paycheck-item-value positive"><span class="paycheck-nm">${fmt(nm)}</span></div></div>
+            </div>
+            <div class="paycheck-summary ${adjustmentMetricClass}">
+              <div class="paycheck-summary-main">Retención aplicada: <strong class="paycheck-applied-rate">${pctRate(payrollData.tasaAplicada)}</strong>${payrollData.modoRetencion === 'personalizada' ? ` · Calculada: <strong class="paycheck-official-rate">${pctRate(payrollData.tasaOficial)}</strong>` : ''}</div>
+              <div class="paycheck-summary-adjustment">${getAdjustmentSummaryHtml(payrollData.ajusteAnual)}</div>
             </div>
           </div>
         </div>
@@ -2598,10 +2856,12 @@
     function updateCalculatorUI(calcIndex) {
       const state = ensureCalculator(calcIndex);
       const data = recalculateCalculator(calcIndex);
+      const payrollData = calcularRetencionNomina(data, state);
       const salaryInputConfig = getSalaryInputConfig(state, data, salaryInputMode);
-      const nm = data.net / state.pagas;
-      const gm = data.g / state.pagas;
-      const dm = (data.ss + data.tax) / state.pagas;
+      const nm = payrollData.netoPorPaga;
+      const gm = payrollData.brutoPorPaga;
+      const ssm = payrollData.ssPorPaga;
+      const rm = payrollData.retencionPorPaga;
       const calcDiv = document.querySelector(`.calculator[data-calc-index="${calcIndex}"]`);
       if (!calcDiv) return;
 
@@ -2654,13 +2914,36 @@
       const disabilitySelect = calcDiv.querySelector('.disability-select');
       if (disabilitySelect) disabilitySelect.value = normalizaDiscapacidad(state.discapacidad, state.movilidadReducida);
 
+      calcDiv.querySelectorAll('.retention-mode-btn').forEach((button) => {
+        const isActive = button.dataset.retencionMode === payrollData.modoRetencion;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+
+      const retentionManualInput = calcDiv.querySelector('.retention-manual-input');
+      if (retentionManualInput) {
+        retentionManualInput.hidden = payrollData.modoRetencion !== 'personalizada';
+      }
+
+      const withholdingRateInput = calcDiv.querySelector('.withholding-rate-input');
+      if (withholdingRateInput) {
+        withholdingRateInput.value = formatRetencionInput(state.retencionPctPersonalizada);
+      }
+
       calcDiv.querySelector('.metric-net').textContent = fmt(data.net);
       calcDiv.querySelector('.metric-net-label').textContent = pct(data.np) + ' del bruto';
       calcDiv.querySelector('.metric-netpay').textContent = fmt(nm);
-      calcDiv.querySelector('.metric-netpay-label').textContent = `${state.pagas} pagas al año`;
-      calcDiv.querySelector('.metric-irpf').textContent = pct(data.tr);
-      calcDiv.querySelector('.metric-irpf-label').textContent = `${fmt(data.tax)} al año`;
-      calcDiv.querySelector('.metric-total').textContent = pct(data.eff);
+      calcDiv.querySelector('.metric-netpay-label').textContent = `${state.pagas} pagas · retención ${pctRate(payrollData.tasaAplicada)}`;
+      calcDiv.querySelector('.metric-irpf').textContent = pctRate(payrollData.tasaAplicada);
+      calcDiv.querySelector('.metric-irpf-label').textContent = `${getRetentionModeDisplayLabel(payrollData.modoRetencion)} · ${fmt(payrollData.retencionAnual)} al año`;
+      const adjustmentMetric = calcDiv.querySelector('.metric-adjustment');
+      adjustmentMetric.textContent = fmt(Math.abs(payrollData.ajusteAnual));
+      adjustmentMetric.classList.remove('negative', 'neutral', 'positive');
+      const adjustmentMetricClass = getAdjustmentMetricClass(payrollData.ajusteAnual);
+      if (adjustmentMetricClass) {
+        adjustmentMetric.classList.add(adjustmentMetricClass);
+      }
+      calcDiv.querySelector('.metric-adjustment-label').textContent = getAdjustmentLabel(payrollData.ajusteAnual);
       calcDiv.querySelector('.breakdown-g').textContent = fmt(data.g);
       calcDiv.querySelector('.breakdown-ss').innerHTML = `− ${fmt(data.ss)} (${pct(data.sp)})`;
       calcDiv.querySelector('.social-security-rows').innerHTML = renderSocialSecurityRows(data);
@@ -2669,6 +2952,7 @@
       calcDiv.querySelector('.employer-social-security-rows').innerHTML = renderEmployerSocialSecurityRows(data);
       calcDiv.querySelector('.breakdown-tax').innerHTML = `− ${fmt(data.tax)} (${pct(data.ip)})`;
       calcDiv.querySelector('.deduction-rows').innerHTML = renderDeductionRows(data);
+      calcDiv.querySelector('.breakdown-withholding').innerHTML = `− ${fmt(payrollData.retencionAnual)} (${pct(payrollData.tasaAplicada)})`;
       calcDiv.querySelector('.breakdown-net').textContent = fmt(data.net);
       calcDiv.querySelector('.chart-segment.segment-net').style.width = `${(data.np * 100).toFixed(1)}%`;
       calcDiv.querySelector('.chart-segment.segment-ss').style.width = `${(data.sp * 100).toFixed(1)}%`;
@@ -2679,9 +2963,21 @@
         legend[1].innerHTML = `<span class="legend-dot segment-ss"></span>SS ${pct(data.sp)}`;
         legend[2].innerHTML = `<span class="legend-dot segment-irpf"></span>IRPF ${pct(data.ip)}`;
       }
+      calcDiv.querySelector('.paycheck-helper').textContent = getPaycheckHelperText(payrollData.modoRetencion);
       calcDiv.querySelector('.paycheck-gm').textContent = fmt(gm);
-      calcDiv.querySelector('.paycheck-dm').textContent = fmt(dm);
+      calcDiv.querySelector('.paycheck-ssm').textContent = fmt(ssm);
+      calcDiv.querySelector('.paycheck-rm').textContent = fmt(rm);
       calcDiv.querySelector('.paycheck-nm').textContent = fmt(nm);
+      const paycheckSummary = calcDiv.querySelector('.paycheck-summary');
+      paycheckSummary.classList.remove('negative', 'neutral', 'positive');
+      if (adjustmentMetricClass) {
+        paycheckSummary.classList.add(adjustmentMetricClass);
+      }
+      const appliedRateEl = calcDiv.querySelector('.paycheck-applied-rate');
+      if (appliedRateEl) appliedRateEl.textContent = pctRate(payrollData.tasaAplicada);
+      const officialRateEl = calcDiv.querySelector('.paycheck-official-rate');
+      if (officialRateEl) officialRateEl.textContent = pctRate(payrollData.tasaOficial);
+      calcDiv.querySelector('.paycheck-summary-adjustment').innerHTML = getAdjustmentSummaryHtml(payrollData.ajusteAnual);
       persistSalaryState();
     }
 
@@ -2757,6 +3053,21 @@
         input.addEventListener('change', function () {
           const calcIndex = Number(this.dataset.calcIndex);
           calculators[calcIndex].primaAtep = normalizaPrimaAtep(this.value);
+          updateCalculatorUI(calcIndex);
+        });
+      });
+      document.querySelectorAll('.retention-mode-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].retencionMode = normalizaModoRetencion(this.dataset.retencionMode);
+          updateCalculatorUI(calcIndex);
+        });
+      });
+      document.querySelectorAll('.withholding-rate-input').forEach(input => {
+        input.addEventListener('input', function () {
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].retencionMode = 'personalizada';
+          calculators[calcIndex].retencionPctPersonalizada = normalizaRetencionPersonalizada(this.value);
           updateCalculatorUI(calcIndex);
         });
       });
