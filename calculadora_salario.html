@@ -556,6 +556,77 @@
       border: 1px solid var(--border-color);
     }
 
+    .fiscal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      padding: 0.05rem 0rem;
+      margin: 0;
+      border-radius: 0.5rem;
+      transition: background 0.15s;
+    }
+
+    .fiscal-header:hover {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    html.dark-mode .fiscal-header:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .fiscal-header-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .fiscal-chevron {
+      color: var(--text-tertiary);
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1;
+      transition: transform 0.2s ease, color 0.2s ease;
+      flex-shrink: 0;
+      transform: rotate(180deg);
+    }
+
+    .fiscal-group.collapsed .fiscal-chevron {
+      transform: rotate(0deg);
+      color: var(--text-tertiary);
+    }
+
+    .fiscal-header:hover .fiscal-chevron,
+    .fiscal-header:hover .fiscal-header-title {
+      color: var(--accent-blue);
+    }
+
+    .fiscal-group.collapsed .fiscal-header:hover .fiscal-chevron,
+    .fiscal-group.collapsed .fiscal-header:hover .fiscal-header-title {
+      color: var(--accent-blue);
+    }
+
+    .fiscal-body {
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.2s ease;
+      max-height: 2000px;
+      opacity: 1;
+    }
+
+    .fiscal-body > *:first-child {
+      margin-top: 0.75rem;
+    }
+
+    .fiscal-group.collapsed .fiscal-body {
+      max-height: 0;
+      opacity: 0;
+      margin-top: 0;
+    }
+
     .region-selector {
       margin-bottom: 1rem;
     }
@@ -2759,6 +2830,11 @@
           </div>
 
           <div class="fiscal-group">
+            <div class="fiscal-header" data-calc-index="${calcIndex}" role="button" tabindex="0" aria-expanded="true" aria-controls="fiscal-body-${calcId}">
+              <span class="fiscal-header-title">📝 Información fiscal y laboral</span>
+              <span class="fiscal-chevron" aria-hidden="true">▾</span>
+            </div>
+            <div class="fiscal-body" id="fiscal-body-${calcId}">
             <div class="region-selector inline-select">
               <label for="${territorySelectId}">📍 Comunidad / Régimen fiscal:</label>
               <select id="${territorySelectId}" class="territorio-select" data-calc-index="${calcIndex}">
@@ -2831,6 +2907,7 @@
             </div>
             <div class="inline-select helper-text">
               💡 Supuestos 2026: trabajador por cuenta ajena en Régimen General durante todo el año. La base mínima de grupo se aplica asumiendo jornada completa; no se modelan horas extra, retribución flexible ni contrato formativo en alternancia. La deducción por familia numerosa se activa manualmente y aproxima su límite por cotizaciones con la cuota obrera calculada; no se modelan abono anticipado, cesiones ni devoluciones por encima de cuota. La prima AT/EP depende de la actividad, CNAE u ocupación, por lo que debes introducirla manualmente: si la dejas en 0%, el coste empresa seguirá sin esa parte. La retención en nómina puede ajustarse para simular una solicitud voluntaria distinta de la calculada automáticamente; eso modifica el neto cobrado por paga, pero no el IRPF final estimado.
+            </div>
             </div>
           </div>
 
@@ -3265,6 +3342,26 @@
       }
     }
 
+    // Fiscal group toggle
+    document.addEventListener('click', (e) => {
+      const header = e.target.closest('.fiscal-header');
+      if (!header) return;
+      const calcIndex = header.dataset.calcIndex;
+      const fiscalGroup = header.parentElement;
+      const body = fiscalGroup.querySelector('.fiscal-body');
+      const isCollapsed = fiscalGroup.classList.toggle('collapsed');
+      header.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+      localStorage.setItem(`fiscalCollapsed-${calcIndex}`, isCollapsed ? '1' : '0');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const header = e.target.closest('.fiscal-header');
+      if (!header) return;
+      e.preventDefault();
+      header.click();
+    });
+
     function applyTheme(theme, persistPreference = true) {
       document.documentElement.classList.toggle('dark-mode', theme === 'dark');
       updateThemeToggle(theme);
@@ -3316,6 +3413,17 @@
     applySalaryInputMode(resolveSalaryInputMode(restoredSalaryState), false, false);
     applyCurrentMode(currentMode, false);
     renderCalculators();
+
+    // Restore fiscal group collapsed states
+    document.querySelectorAll('.fiscal-group').forEach((group) => {
+      const header = group.querySelector('.fiscal-header');
+      if (!header) return;
+      const calcIndex = header.dataset.calcIndex;
+      if (localStorage.getItem(`fiscalCollapsed-${calcIndex}`) === '1') {
+        group.classList.add('collapsed');
+        header.setAttribute('aria-expanded', 'false');
+      }
+    });
   </script>
 </body>
 
