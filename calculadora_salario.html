@@ -2251,6 +2251,108 @@
       };
     }
 
+    const salaryCalculatorStateStorageKey = 'salaryCalculatorState';
+    const SUPPORTED_PAY_COUNTS = new Set([12, 13, 14, 15, 16]);
+    const TERRITORY_VALUES = new Set(TERRITORY_GROUPS.flatMap((group) => group.options.map((option) => option.value)));
+    const CONTRACT_TYPE_VALUES = new Set(CONTRACT_TYPES.map((option) => option.value));
+    const AGE_RANGE_VALUES = new Set(['menor65', '65-74', '75+']);
+
+    function normalizeSalaryInputMode(mode) {
+      return mode === 'net' ? 'net' : 'gross';
+    }
+
+    function normalizeCurrentMode(mode) {
+      return mode === 'compare' ? 'compare' : 'single';
+    }
+
+    function normalizeCompareCalculatorCount(count) {
+      const parsedCount = parseInt(count, 10);
+      const safeCount = Number.isInteger(parsedCount) ? parsedCount : MIN_COMPARE_CALCULATORS;
+      return Math.max(MIN_COMPARE_CALCULATORS, Math.min(MAX_COMPARE_CALCULATORS, safeCount));
+    }
+
+    function normalizePersistedCalculatorState(storedState = {}) {
+      const state = createCalculatorState();
+
+      if (storedState.bruto !== undefined && storedState.bruto !== null) {
+        state.bruto = clampAnnualGross(storedState.bruto);
+      }
+
+      if (SUPPORTED_PAY_COUNTS.has(Number(storedState.pagas))) {
+        state.pagas = Number(storedState.pagas);
+      }
+
+      state.hijos = normalizaNumeroHijos(storedState.hijos);
+      state.territorio = TERRITORY_VALUES.has(storedState.territorio) ? storedState.territorio : state.territorio;
+      state.rangoEdad = AGE_RANGE_VALUES.has(storedState.rangoEdad) ? storedState.rangoEdad : state.rangoEdad;
+      state.tipoContrato = CONTRACT_TYPE_VALUES.has(storedState.tipoContrato) ? storedState.tipoContrato : state.tipoContrato;
+      state.grupoCotizacion = normalizaGrupoCotizacion(storedState.grupoCotizacion);
+      state.familiaNumerosa = normalizaFamiliaNumerosa(storedState.familiaNumerosa);
+      state.discapacidad = normalizaDiscapacidad(storedState.discapacidad, storedState.movilidadReducida);
+      state.movilidadReducida = tieneMovilidadReducidaOAsistencia(state.discapacidad);
+      state.primaAtep = normalizaPrimaAtep(storedState.primaAtep);
+
+      if (storedState.netoObjetivoPaga !== undefined && storedState.netoObjetivoPaga !== null) {
+        state.netoObjetivoPaga = clampNetTargetPerPay(storedState.netoObjetivoPaga, state);
+      }
+
+      return state;
+    }
+
+    function serializeCalculatorState(state) {
+      return {
+        bruto: state.bruto,
+        pagas: state.pagas,
+        hijos: state.hijos,
+        territorio: state.territorio,
+        rangoEdad: state.rangoEdad,
+        tipoContrato: state.tipoContrato,
+        grupoCotizacion: state.grupoCotizacion,
+        familiaNumerosa: state.familiaNumerosa,
+        discapacidad: state.discapacidad,
+        movilidadReducida: state.movilidadReducida,
+        primaAtep: state.primaAtep,
+        netoObjetivoPaga: state.netoObjetivoPaga
+      };
+    }
+
+    function readStoredSalaryState() {
+      try {
+        const rawValue = localStorage.getItem(salaryCalculatorStateStorageKey);
+        if (!rawValue) return null;
+
+        const parsedValue = JSON.parse(rawValue);
+        return parsedValue && typeof parsedValue === 'object' ? parsedValue : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function restoreSalaryState(savedState) {
+      if (!savedState) return;
+
+      currentMode = normalizeCurrentMode(savedState.currentMode);
+      compareCalculatorCount = normalizeCompareCalculatorCount(savedState.compareCalculatorCount);
+
+      if (Array.isArray(savedState.calculators) && savedState.calculators.length > 0) {
+        calculators = savedState.calculators
+          .slice(0, MAX_COMPARE_CALCULATORS)
+          .map((storedCalculator) => normalizePersistedCalculatorState(storedCalculator));
+      }
+    }
+
+    function persistSalaryState() {
+      const payload = {
+        currentMode,
+        salaryInputMode,
+        compareCalculatorCount,
+        calculators: calculators.map((state) => serializeCalculatorState(state))
+      };
+
+      localStorage.setItem(salaryInputModeStorageKey, salaryInputMode);
+      localStorage.setItem(salaryCalculatorStateStorageKey, JSON.stringify(payload));
+    }
+
     let currentMode = 'single';
     let salaryInputMode = 'gross';
     let compareCalculatorCount = MIN_COMPARE_CALCULATORS;
@@ -2580,6 +2682,7 @@
       calcDiv.querySelector('.paycheck-gm').textContent = fmt(gm);
       calcDiv.querySelector('.paycheck-dm').textContent = fmt(dm);
       calcDiv.querySelector('.paycheck-nm').textContent = fmt(nm);
+      persistSalaryState();
     }
 
     function renderCalculators() {
@@ -2590,6 +2693,7 @@
       container.classList.add(currentMode === 'single' ? 'single-mode' : 'compare-mode');
       updateCompareControls();
       attachEventListeners();
+      persistSalaryState();
     }
 
     function attachEventListeners() {
@@ -2700,16 +2804,19 @@
 
     // Toggle tema oscuro/claro
     const salaryModeButtons = Array.from(document.querySelectorAll('.salary-mode-btn'));
+    const mainModeButtons = Array.from(document.querySelectorAll('.mode-btn'));
     const salaryInputModeStorageKey = 'salaryInputMode';
     const themeToggle = document.getElementById('themeToggle');
     const themeTextSpan = document.getElementById('themeText');
     const themeStorageKey = 'theme';
     const systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-    function resolveSalaryInputMode() {
-      const savedMode = localStorage.getItem(salaryInputModeStorageKey);
+    function resolveSalaryInputMode(savedState = null) {
+      const savedMode = savedState && typeof savedState.salaryInputMode === 'string'
+        ? savedState.salaryInputMode
+        : localStorage.getItem(salaryInputModeStorageKey);
 
-      return savedMode === 'net' ? 'net' : 'gross';
+      return normalizeSalaryInputMode(savedMode);
     }
 
     function updateSalaryModeSelector(mode) {
@@ -2721,12 +2828,31 @@
     }
 
     function applySalaryInputMode(mode, persistPreference = true, rerender = true) {
-      salaryInputMode = mode === 'net' ? 'net' : 'gross';
+      salaryInputMode = normalizeSalaryInputMode(mode);
       updateSalaryModeSelector(salaryInputMode);
 
       if (persistPreference) {
         localStorage.setItem(salaryInputModeStorageKey, salaryInputMode);
       }
+
+      if (rerender) {
+        renderCalculators();
+      } else if (persistPreference) {
+        persistSalaryState();
+      }
+    }
+
+    function syncMainModeButtons() {
+      mainModeButtons.forEach((button) => {
+        const isActive = button.dataset.mode === currentMode;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+    }
+
+    function applyCurrentMode(mode, rerender = true) {
+      currentMode = normalizeCurrentMode(mode);
+      syncMainModeButtons();
 
       if (rerender) {
         renderCalculators();
@@ -2785,16 +2911,9 @@
       });
     });
 
-    document.querySelectorAll('.mode-btn').forEach(btn => {
-      btn.addEventListener('click', function () {
-        document.querySelectorAll('.mode-btn').forEach(button => {
-          const isActive = button === this;
-          button.classList.toggle('active', isActive);
-          button.setAttribute('aria-pressed', String(isActive));
-        });
-
-        currentMode = this.dataset.mode;
-        renderCalculators();
+    mainModeButtons.forEach((button) => {
+      button.addEventListener('click', function () {
+        applyCurrentMode(this.dataset.mode);
       });
     });
 
@@ -2806,7 +2925,10 @@
       setCompareCalculatorCount(compareCalculatorCount - 1);
     });
 
-    applySalaryInputMode(resolveSalaryInputMode(), false, false);
+    const restoredSalaryState = readStoredSalaryState();
+    restoreSalaryState(restoredSalaryState);
+    applySalaryInputMode(resolveSalaryInputMode(restoredSalaryState), false, false);
+    applyCurrentMode(currentMode, false);
     renderCalculators();
   </script>
 </body>

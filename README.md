@@ -10,7 +10,7 @@
 
 Calculadora web para estimar el salario bruto, el salario neto anual y por paga y el coste empresa aproximado en España, con modo individual y comparativo entre varios escenarios.
 
-La aplicación **funciona completamente offline y es 100% privada**: todos los cálculos se realizan en el lado del cliente, es decir, en tu navegador, sin enviar ni recibir datos de servidores externos.
+La aplicación **funciona completamente offline y es 100% privada**: todos los cálculos se realizan en el lado del cliente, es decir, en tu navegador, sin enviar ni recibir datos de servidores externos. Además, el navegador recuerda localmente tu último modo de uso y tus últimos escenarios mediante `localStorage`, sin salir de tu equipo.
 
 ## ⚠️ Descargo de responsabilidad
 
@@ -29,6 +29,8 @@ Los resultados proporcionados por la herramienta son **meramente orientativos** 
 4. Selecciona el territorio, el tipo de contrato, el grupo de cotización, la prima AT/EP aplicable, el número de hijos, si aplica familia numerosa, la edad y la situación de discapacidad.
 5. Si seleccionas `5 o más hijos`, introduce además el número exacto para no perder el mínimo por descendientes adicional.
 6. Elige el número de pagas al año.
+
+La calculadora recuerda automáticamente en el mismo navegador el tema, el modo `bruto anual` o `neto por paga`, el modo `Calcular` o `Comparar salarios`, el número de escenarios visibles y los últimos importes y perfiles fiscales/laborales introducidos en cada escenario.
 
 En 12 pagas, el modo inverso interpreta la entrada como **neto mensual**. Si eliges 13, 14, 15 o 16 pagas, la entrada se interpreta como **neto por paga** para mantener la coherencia del cálculo anual.
 
@@ -52,6 +54,7 @@ Si lo deseas, puedes activar el modo **Comparar salarios** para ver entre 2 y 10
 - Deducción adicional en cuota para rentas bajas vinculada al SMI 2026.
 - Modo comparación para evaluar entre 2 y 10 escenarios simultáneos.
 - Tema oscuro y claro y detección automática del modo preferido en la primera visita.
+- Persistencia local automática del último estado de uso: modo salarial, modo simple o comparativo, número de escenarios y valores introducidos en cada calculadora.
 - Funcionamiento completamente offline, sin necesidad de conexión a Internet.
 
 ## ⚙️ Modelo de cálculo
