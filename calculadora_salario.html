@@ -468,6 +468,13 @@
       flex-wrap: wrap;
     }
 
+    .salary-input-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-width: 0;
+    }
+
     .input-mode-result {
       display: flex;
       align-items: center;
@@ -583,6 +590,10 @@
       padding-left: 0.9rem;
       margin-left: 0.15rem;
       border-left: 2px solid var(--border-color);
+    }
+
+    .children-exact-wrapper[hidden] {
+      display: none;
     }
 
     .inline-select label {
@@ -1059,6 +1070,54 @@
       .retention-inline-control {
         width: 100%;
         justify-content: flex-start;
+      }
+
+      .input-row,
+      .inline-select,
+      .children-main-row,
+      .children-exact-wrapper {
+        align-items: stretch;
+      }
+
+      .input-row {
+        flex-direction: column;
+      }
+
+      .salary-input-control,
+      .inline-input-with-suffix,
+      .retention-inline-control {
+        width: 100%;
+      }
+
+      .salary-input,
+      .children-exact-input,
+      .company-atep-input,
+      .withholding-rate-input {
+        width: 100%;
+      }
+
+      .inline-select,
+      .children-main-row,
+      .children-exact-wrapper {
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+
+      .inline-select select,
+      .children-main-row select {
+        width: 100%;
+      }
+
+      .inline-input-with-suffix {
+        justify-content: flex-start;
+      }
+
+      .children-exact-wrapper {
+        padding-left: 0;
+        margin-left: 0;
+        padding-top: 0.75rem;
+        border-left: none;
+        border-top: 2px solid var(--border-color);
       }
 
       .retention-mode-selector {
@@ -2688,8 +2747,10 @@
             <div class="range-limits" id="${calcId}-salary-limits"><span class="range-limit-start">0 €</span><span class="range-limit-end">${salaryInputConfig.rangeMaxLabel}</span></div>
             <div class="input-row">
               <label class="salary-input-label" for="${salaryInputId}">${salaryInputConfig.inputLabel}</label>
-              <input id="${salaryInputId}" type="number" min="0" max="${salaryInputConfig.inputMax}" step="${salaryInputConfig.inputStep}" value="${salaryInputConfig.inputValue}" class="salary-input" data-calc-index="${calcIndex}" inputmode="numeric">
-              <span>€</span>
+              <div class="salary-input-control">
+                <input id="${salaryInputId}" type="number" min="0" max="${salaryInputConfig.inputMax}" step="${salaryInputConfig.inputStep}" value="${salaryInputConfig.inputValue}" class="salary-input" data-calc-index="${calcIndex}" inputmode="numeric">
+                <span>€</span>
+              </div>
             </div>
             <div class="input-mode-result" ${salaryInputConfig.showEstimate ? '' : 'hidden'}>
               <span>Bruto anual estimado</span>
