@@ -1,6 +1,7 @@
 # 💰 Calculadora de Salario + Cotizaciones
 
 - [💰 Calculadora de Salario + Cotizaciones](#-calculadora-de-salario--cotizaciones)
+  - [📷 Apariencia](#-apariencia)
   - [⚠️ Descargo de responsabilidad](#️-descargo-de-responsabilidad)
   - [🚀 Uso](#-uso)
   - [🧮 Características](#-características)
@@ -11,6 +12,17 @@
 Calculadora web para estimar el salario bruto, el salario neto anual y por paga y el coste empresa aproximado en España, con modo individual y comparativo entre varios escenarios.
 
 La aplicación **funciona completamente offline y es 100% privada**: todos los cálculos se realizan en el lado del cliente, es decir, en tu navegador, sin enviar ni recibir datos de servidores externos. Además, el navegador recuerda localmente tu último modo de uso y tus últimos escenarios mediante `localStorage`, sin salir de tu equipo.
+
+## 📷 Apariencia
+
+<details>
+  <summary><strong>Vista previa de la calculadora - Click en ella para verla al completo</strong></summary>
+  <a href="img/screenshot-fullpage.png" target="_blank">
+    <p align="center">
+      <img src="img/screenshot.png" alt="Vista previa de la calculadora">
+    </p>
+  </a>
+</details>
 
 ## ⚠️ Descargo de responsabilidad
 
@@ -36,8 +48,6 @@ La calculadora recuerda automáticamente en el mismo navegador el tema, el modo 
 En 12 pagas, el modo inverso interpreta la entrada como **neto mensual**. Si eliges 13, 14, 15 o 16 pagas, la entrada se interpreta como **neto por paga** para mantener la coherencia del cálculo anual.
 
 Si lo deseas, puedes activar el modo **Comparar salarios** para ver entre 2 y 10 situaciones diferentes lado a lado y ajustar el número de escenarios con los botones `+` y `−`.
-
-[![Vista previa de la calculadora](img/screenshot.png)](img/screenshot-fullpage.png)
 
 ## 🧮 Características
 
