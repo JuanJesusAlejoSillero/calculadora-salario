@@ -427,6 +427,41 @@
       line-height: 1.2;
     }
 
+    .salary-display-input {
+      display: block;
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--border-color);
+      border-radius: 0;
+      padding: 0.15rem 0.25rem;
+      font-family: inherit;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      outline: none;
+      transition: border-color 0.2s ease;
+      cursor: text;
+      -moz-appearance: textfield;
+    }
+
+    .salary-display-input::-webkit-outer-spin-button,
+    .salary-display-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .salary-display-input:hover {
+      border-bottom-color: var(--text-secondary);
+    }
+
+    .salary-display-input:focus {
+      border-bottom-color: var(--accent-blue);
+      box-shadow: 0 2px 0 0 rgba(108, 71, 255, 0.15);
+    }
+
     input[type="range"] {
       width: 100%;
       height: 5px;
@@ -462,21 +497,6 @@
       font-size: 0.7rem;
       color: var(--text-tertiary);
       margin-top: 0.5rem;
-    }
-
-    .input-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-top: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .salary-input-control {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      min-width: 0;
     }
 
     .input-mode-result {
@@ -1135,7 +1155,7 @@
         padding: 1.3rem;
       }
 
-      .salary-display {
+      .salary-display-input {
         font-size: 2rem;
       }
 
@@ -1150,24 +1170,17 @@
         justify-content: flex-start;
       }
 
-      .input-row,
       .inline-select,
       .children-main-row,
       .children-exact-wrapper {
         align-items: stretch;
       }
 
-      .input-row {
-        flex-direction: column;
-      }
-
-      .salary-input-control,
       .inline-input-with-suffix,
       .retention-inline-control {
         width: 100%;
       }
 
-      .salary-input,
       .children-exact-input,
       .company-atep-input,
       .withholding-rate-input {
@@ -2284,8 +2297,8 @@
     }
 
     // Formateadores
-    function fmt(n) { return Math.round(n).toLocaleString('es-ES') + ' €'; }
-    function fmtPlain(n) { return Math.round(n).toLocaleString('es-ES'); }
+    function fmt(n) { return Math.round(n).toLocaleString('es-ES', {useGrouping:'always'}) + ' €'; }
+    function fmtPlain(n) { return Math.round(n).toLocaleString('es-ES', {useGrouping:'always'}); }
     function pct(n) { return ((n || 0) * 100).toFixed(1) + '%'; }
     function pctRate(n) { return ((n || 0) * 100).toFixed(2).replace('.', ',') + '%'; }
 
@@ -2318,10 +2331,6 @@
 
     function getNetTargetSectionLabel(pagas) {
       return pagas === 12 ? 'Neto mensual objetivo' : 'Neto por paga objetivo';
-    }
-
-    function getNetTargetInputLabel(pagas) {
-      return pagas === 12 ? 'O introduce el neto mensual:' : 'O introduce el neto por paga:';
     }
 
     function renderDeductionRows(data) {
@@ -2566,14 +2575,10 @@
 
         return {
           sectionLabel: getNetTargetSectionLabel(state.pagas),
-          displayValue: fmt(state.netoObjetivoPaga),
           rangeValue: state.netoObjetivoPaga,
           rangeMax: maxTarget,
           rangeStep: NET_TARGET_INPUT_STEP,
-          inputValue: state.netoObjetivoPaga,
-          inputStep: NET_TARGET_INPUT_STEP,
-          inputMax: maxTarget,
-          inputLabel: getNetTargetInputLabel(state.pagas),
+          inputValue: fmt(state.netoObjetivoPaga),
           rangeMaxLabel: `${fmtPlain(maxTarget)} €`,
           showEstimate: true,
           estimateValue: fmt(data.g)
@@ -2584,14 +2589,10 @@
 
       return {
         sectionLabel: 'Salario bruto anual',
-        displayValue: fmt(state.bruto),
         rangeValue: state.bruto,
         rangeMax: grossMax,
         rangeStep: GROSS_INPUT_STEP,
-        inputValue: state.bruto,
-        inputStep: GROSS_INPUT_STEP,
-        inputMax: grossMax,
-        inputLabel: 'O introduce el importe:',
+        inputValue: fmt(state.bruto),
         rangeMaxLabel: `${fmtPlain(grossMax)} €`,
         showEstimate: false,
         estimateValue: fmt(data.g)
@@ -2819,16 +2820,9 @@
           
           <div class="section">
             <label class="label salary-section-label" for="${salaryRangeId}">${salaryInputConfig.sectionLabel}</label>
-            <div class="salary-display" aria-live="polite">${salaryInputConfig.displayValue}</div>
+            <input id="${salaryInputId}" type="text" inputmode="numeric" value="${salaryInputConfig.inputValue}" class="salary-display salary-display-input" data-calc-index="${calcIndex}" aria-live="polite">
             <input id="${salaryRangeId}" type="range" min="0" max="${salaryInputConfig.rangeMax}" step="${salaryInputConfig.rangeStep}" value="${salaryInputConfig.rangeValue}" class="salary-range" data-calc-index="${calcIndex}" aria-describedby="${calcId}-salary-limits">
             <div class="range-limits" id="${calcId}-salary-limits"><span class="range-limit-start">0 €</span><span class="range-limit-end">${salaryInputConfig.rangeMaxLabel}</span></div>
-            <div class="input-row">
-              <label class="salary-input-label" for="${salaryInputId}">${salaryInputConfig.inputLabel}</label>
-              <div class="salary-input-control">
-                <input id="${salaryInputId}" type="number" min="0" max="${salaryInputConfig.inputMax}" step="${salaryInputConfig.inputStep}" value="${salaryInputConfig.inputValue}" class="salary-input" data-calc-index="${calcIndex}" inputmode="numeric">
-                <span>€</span>
-              </div>
-            </div>
             <div class="input-mode-result" ${salaryInputConfig.showEstimate ? '' : 'hidden'}>
               <span>Bruto anual estimado</span>
               <strong class="input-mode-result-value">${salaryInputConfig.estimateValue}</strong>
@@ -3010,14 +3004,11 @@
       if (!calcDiv) return;
 
       calcDiv.querySelector('.salary-section-label').textContent = salaryInputConfig.sectionLabel;
-      calcDiv.querySelector('.salary-display').textContent = salaryInputConfig.displayValue;
-      const salaryInput = calcDiv.querySelector('.salary-input');
-      if (salaryInput) {
-        if (document.activeElement !== salaryInput) {
-          salaryInput.value = salaryInputConfig.inputValue;
+      const salaryDisplay = calcDiv.querySelector('.salary-display-input');
+      if (salaryDisplay) {
+        if (document.activeElement !== salaryDisplay) {
+          salaryDisplay.value = salaryInputConfig.inputValue;
         }
-        salaryInput.max = salaryInputConfig.inputMax;
-        salaryInput.step = salaryInputConfig.inputStep;
       }
       const rangeInput = calcDiv.querySelector('.salary-range');
       if (rangeInput) {
@@ -3027,7 +3018,6 @@
         rangeInput.max = salaryInputConfig.rangeMax;
         rangeInput.step = salaryInputConfig.rangeStep;
       }
-      calcDiv.querySelector('.salary-input-label').textContent = salaryInputConfig.inputLabel;
       calcDiv.querySelector('.range-limit-end').textContent = salaryInputConfig.rangeMaxLabel;
       const inputModeResult = calcDiv.querySelector('.input-mode-result');
       if (inputModeResult) {
@@ -3165,17 +3155,27 @@
           updateCalculatorUI(calcIndex);
         });
       });
-      document.querySelectorAll('.salary-input').forEach(el => {
+      document.querySelectorAll('.salary-display-input').forEach(el => {
         el.addEventListener('input', function () {
           const calcIndex = Number(this.dataset.calcIndex);
           const state = ensureCalculator(calcIndex);
+          const num = parseInt(this.value.replace(/[^0-9]/g, ''), 10) || 0;
 
           if (salaryInputMode === 'net') {
-            state.netoObjetivoPaga = clampNetTargetPerPay(this.value, state);
+            state.netoObjetivoPaga = clampNetTargetPerPay(num, state);
           } else {
-            state.bruto = clampAnnualGross(this.value);
+            state.bruto = clampAnnualGross(num);
           }
 
+          updateCalculatorUI(calcIndex);
+        });
+
+        el.addEventListener('focus', function () {
+          this.select();
+        });
+
+        el.addEventListener('blur', function () {
+          const calcIndex = Number(this.dataset.calcIndex);
           updateCalculatorUI(calcIndex);
         });
       });
