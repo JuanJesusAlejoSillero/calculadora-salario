@@ -430,11 +430,10 @@
     .salary-display-input {
       display: block;
       width: 100%;
-      background: transparent;
-      border: none;
-      border-bottom: 2px solid var(--border-color);
-      border-radius: 0;
-      padding: 0.15rem 0.25rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.4rem 1rem;
       font-family: inherit;
       font-size: 2.5rem;
       font-weight: 700;
@@ -442,7 +441,7 @@
       margin-bottom: 1rem;
       line-height: 1.2;
       outline: none;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
       cursor: text;
       -moz-appearance: textfield;
     }
@@ -454,12 +453,14 @@
     }
 
     .salary-display-input:hover {
-      border-bottom-color: var(--text-secondary);
+      border-color: var(--text-tertiary);
+      background: var(--bg-secondary);
     }
 
     .salary-display-input:focus {
-      border-bottom-color: var(--accent-blue);
-      box-shadow: 0 2px 0 0 rgba(108, 71, 255, 0.15);
+      border-color: var(--accent-blue);
+      background: var(--bg-secondary);
+      box-shadow: 0 0 0 3px rgba(108, 71, 255, 0.12);
     }
 
     input[type="range"] {
