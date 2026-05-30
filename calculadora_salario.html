@@ -2197,7 +2197,8 @@
       }
 
       const cotizacionSS = calcularCotizacionSeguridadSocial(bruto, tipoContrato, grupoCotizacion, discapacidad, primaAtep);
-      const ss = cotizacionSS.total;
+      let ss = cotizacionSS.total;
+      if (ss > bruto) ss = bruto;
       const gastoActivoDiscapacidad = gastoDeducibleTrabajadorActivoDiscapacidad(discapacidad, movilidadReducida);
       const gastosDeduciblesTrabajo = Math.min(
         Math.max(0, bruto - ss),
