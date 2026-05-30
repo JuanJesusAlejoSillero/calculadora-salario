@@ -2299,8 +2299,8 @@
     }
 
     // Formateadores
-    function fmt(n) { return Math.round(n).toLocaleString('es-ES', {useGrouping:'always'}) + ' €'; }
-    function fmtPlain(n) { return Math.round(n).toLocaleString('es-ES', {useGrouping:'always'}); }
+    function fmt(n) { return Number(n).toLocaleString('es-ES', {useGrouping:'always', minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €'; }
+    function fmtPlain(n) { return Number(n).toLocaleString('es-ES', {useGrouping:'always', minimumFractionDigits: 2, maximumFractionDigits: 2}); }
     function pct(n) { return ((n || 0) * 100).toFixed(1) + '%'; }
     function pctRate(n) { return ((n || 0) * 100).toFixed(2).replace('.', ',') + '%'; }
 
@@ -2320,7 +2320,7 @@
     }
 
     function clampAnnualGross(value, max = MAX_SUPPORTED_GROSS) {
-      return Math.min(max, Math.max(0, Number(value) || 0));
+      return Number(Math.min(max, Math.max(0, Number(value) || 0)).toFixed(2));
     }
 
     function getAnnualGrossInputMax(grossValue = 0) {
@@ -2484,7 +2484,7 @@
     }
 
     function clampNetTargetPerPay(value, state) {
-      return Math.min(getMaxNetTargetPerPay(state), Math.max(0, Number(value) || 0));
+      return Number(Math.min(getMaxNetTargetPerPay(state), Math.max(0, Number(value) || 0)).toFixed(2));
     }
 
     function estimateGrossFromNetTarget(targetNetPerPay, state) {
@@ -3161,7 +3161,7 @@
         el.addEventListener('input', function () {
           const calcIndex = Number(this.dataset.calcIndex);
           const state = ensureCalculator(calcIndex);
-          const num = parseInt(this.value.replace(/[^0-9]/g, ''), 10) || 0;
+          const num = parseFloat(this.value.replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
 
           if (salaryInputMode === 'net') {
             state.netoObjetivoPaga = clampNetTargetPerPay(num, state);
