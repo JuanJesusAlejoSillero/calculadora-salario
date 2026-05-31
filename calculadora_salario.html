@@ -1314,6 +1314,11 @@
           • <strong>Cotización del trabajador en Régimen General 2026</strong>: contingencias comunes 4,70%; desempleo
           1,55% en indefinidos y asimilados o 1,60% en temporales; formación profesional 0,10%; MEI 0,15%; y cuota de
           solidaridad si se supera la base máxima mensual de 5.101,20€.<br>
+          • <strong>Tiempo parcial o salario anual bajo</strong>: la Orden PJC/297/2026 aplica bases mínimas mensuales por
+          grupo en jornada completa (arts. 1 y 3) y bases mínimas horarias en contratos a tiempo parcial (arts. 38 y 39).
+          Por eso la modalidad de cotización <strong>Auto</strong> sólo fuerza la base mínima completa cuando el salario
+          anual es compatible con jornada completa; si no, aproxima la cotización sobre la remuneración declarada para
+          evitar resultados imposibles en salarios bajos.<br>
           • <strong>Coste empresa estimado</strong>: se modelan las cuotas empresariales fijas del Régimen General 2026
           (23,60% por contingencias comunes; desempleo 5,50% o 6,70% según contrato; FOGASA 0,20%; formación
           profesional 0,60%; MEI 0,75%; y cuota de solidaridad si procede). La prima de accidentes de trabajo y
@@ -1589,6 +1594,12 @@
       { value: '4-11', label: 'Grupo 4-11 · Resto de grupos del Régimen General' }
     ];
 
+    const CONTRIBUTION_BASE_OPTIONS = [
+      { value: 'auto', label: 'Auto · según salario declarado' },
+      { value: 'fulltime', label: 'Jornada completa · año completo' },
+      { value: 'actual', label: 'Retribución real · parcial / periodo inferior' }
+    ];
+
     const DISABILITY_OPTIONS = [
       { value: 'ninguna', label: 'Sin discapacidad' },
       { value: '33-64', label: 'Del 33% al 64%' },
@@ -1832,6 +1843,18 @@
       return SS_GROUP_MIN_BASE_MENSUAL[grupoCotizacion] ? grupoCotizacion : '4-11';
     }
 
+    function normalizaModoCotizacionBase(cotizacionMode) {
+      if (cotizacionMode === 'fulltime') {
+        return 'fulltime';
+      }
+
+      if (cotizacionMode === 'actual') {
+        return 'actual';
+      }
+
+      return 'auto';
+    }
+
     function normalizaPrimaAtep(primaAtep) {
       const valor = typeof primaAtep === 'string'
         ? Number(primaAtep.replace(',', '.'))
@@ -1970,6 +1993,35 @@
         : 'Referencia anual media: las pagas extra pueden tener retenciones distintas.';
     }
 
+    // Orden PJC/297/2026: arts. 1 y 3 para jornada completa; arts. 38 y 39 para tiempo parcial.
+    // Como la calculadora no solicita horas trabajadas ni meses efectivos de alta, el modo automático
+    // usa la retribución real cuando el salario anual no encaja con una base mínima anual de jornada completa.
+    function resolveContributionBaseInputs(brutoAnual, grupoCotizacion, cotizacionMode = 'auto') {
+      const grupoNormalizado = normalizaGrupoCotizacion(grupoCotizacion);
+      const modoCotizacionNormalizado = normalizaModoCotizacionBase(cotizacionMode);
+      const baseMinMensual = SS_GROUP_MIN_BASE_MENSUAL[grupoNormalizado];
+      const baseMinAnualTiempoCompleto = baseMinMensual * 12;
+      const baseMensualTeorica = brutoAnual / 12;
+      const asumeRetribucionReal = modoCotizacionNormalizado === 'actual'
+        || (modoCotizacionNormalizado === 'auto' && brutoAnual < baseMinAnualTiempoCompleto - 0.01);
+      const baseMensualCotizacion = asumeRetribucionReal
+        ? Math.min(SS_BASE_MAX_MENSUAL, baseMensualTeorica)
+        : Math.min(SS_BASE_MAX_MENSUAL, Math.max(baseMensualTeorica, baseMinMensual));
+
+      return {
+        grupoNormalizado,
+        modoCotizacionNormalizado,
+        modoCotizacionAplicado: asumeRetribucionReal ? 'actual' : 'fulltime',
+        baseMinMensual,
+        baseMinAnualTiempoCompleto,
+        baseMensualTeorica,
+        baseMensualCotizacion,
+        asumeRetribucionReal,
+        minBaseAplicada: !asumeRetribucionReal && baseMensualTeorica < baseMinMensual,
+        maxBaseAplicada: baseMensualTeorica > SS_BASE_MAX_MENSUAL
+      };
+    }
+
     function calcularCuotaSolidaridad(brutoAnual, rates) {
       const limiteTramo1 = SS_BASE_MAX_ANUAL * 1.1;
       const limiteTramo2 = SS_BASE_MAX_ANUAL * 1.5;
@@ -1999,7 +2051,9 @@
       return calcularCuotaSolidaridad(brutoAnual, SS_EMPLOYER_SOLIDARITY_RATES);
     }
 
-    function calcularCotizacionSeguridadSocial(brutoAnual, tipoContrato = 'indefinido', grupoCotizacion = '4-11', discapacidad = 'ninguna', primaAtep = 0) {
+    function calcularCotizacionSeguridadSocial(brutoAnual, tipoContrato = 'indefinido', grupoCotizacion = '4-11', discapacidad = 'ninguna', primaAtep = 0, cotizacionMode = 'auto') {
+      const modoCotizacionNormalizado = normalizaModoCotizacionBase(cotizacionMode);
+
       if (!brutoAnual || brutoAnual <= 0) {
         return {
           total: 0,
@@ -2007,6 +2061,7 @@
           baseMensualCotizacion: 0,
           baseMensualTeorica: 0,
           baseMinMensual: 0,
+          baseMinAnualTiempoCompleto: 0,
           desempleoRate: tipoDesempleoTrabajador(tipoContrato, discapacidad),
           desempleoEmpresaRate: tipoDesempleoEmpresa(tipoContrato, discapacidad),
           contingenciasComunes: 0,
@@ -2031,15 +2086,19 @@
           empresaSolidaridadTramo3: 0,
           empresaTotal: 0,
           costeEmpresa: 0,
+          cotizacionModeSolicitado: modoCotizacionNormalizado,
+          cotizacionModeAplicado: modoCotizacionNormalizado,
+          asumeRetribucionReal: false,
           minBaseAplicada: false,
           maxBaseAplicada: false
         };
       }
 
-      const grupoNormalizado = normalizaGrupoCotizacion(grupoCotizacion);
-      const baseMinMensual = SS_GROUP_MIN_BASE_MENSUAL[grupoNormalizado];
-      const baseMensualTeorica = brutoAnual / 12;
-      const baseMensualCotizacion = Math.min(SS_BASE_MAX_MENSUAL, Math.max(baseMensualTeorica, baseMinMensual));
+      const contributionBase = resolveContributionBaseInputs(brutoAnual, grupoCotizacion, cotizacionMode);
+      const grupoNormalizado = contributionBase.grupoNormalizado;
+      const baseMinMensual = contributionBase.baseMinMensual;
+      const baseMensualTeorica = contributionBase.baseMensualTeorica;
+      const baseMensualCotizacion = contributionBase.baseMensualCotizacion;
       const baseAnualCotizacion = baseMensualCotizacion * 12;
       const desempleoRate = tipoDesempleoTrabajador(tipoContrato, discapacidad);
       const desempleoEmpresaRate = tipoDesempleoEmpresa(tipoContrato, discapacidad);
@@ -2066,6 +2125,7 @@
         baseMensualCotizacion,
         baseMensualTeorica,
         baseMinMensual,
+        baseMinAnualTiempoCompleto: contributionBase.baseMinAnualTiempoCompleto,
         desempleoRate,
         desempleoEmpresaRate,
         contingenciasComunes,
@@ -2090,8 +2150,11 @@
         empresaSolidaridadTramo3: empresaSolidaridad.cuotaTramo3,
         empresaTotal,
         costeEmpresa,
-        minBaseAplicada: baseMensualTeorica < baseMinMensual,
-        maxBaseAplicada: baseMensualTeorica > SS_BASE_MAX_MENSUAL
+        cotizacionModeSolicitado: contributionBase.modoCotizacionNormalizado,
+        cotizacionModeAplicado: contributionBase.modoCotizacionAplicado,
+        asumeRetribucionReal: contributionBase.asumeRetribucionReal,
+        minBaseAplicada: contributionBase.minBaseAplicada,
+        maxBaseAplicada: contributionBase.maxBaseAplicada
       };
     }
 
@@ -2143,7 +2206,8 @@
       familiaNumerosa = 'ninguna',
       discapacidad = 'ninguna',
       movilidadReducida = false,
-      primaAtep = 0
+      primaAtep = 0,
+      cotizacionMode = 'auto'
     ) {
       if (!bruto || bruto <= 0) {
         return {
@@ -2153,12 +2217,16 @@
           ssBaseMensual: 0,
           ssBaseMensualTeorica: 0,
           ssBaseMinMensual: 0,
+          ssBaseMinAnualTiempoCompleto: 0,
           ssContingenciasComunes: 0,
           ssDesempleo: 0,
           ssFormacion: 0,
           ssMEI: 0,
           ssSolidaridad: 0,
           ssDesempleoRate: 0,
+          ssCotizacionModeSolicitado: normalizaModoCotizacionBase(cotizacionMode),
+          ssCotizacionModeAplicado: normalizaModoCotizacionBase(cotizacionMode),
+          ssAsumeRetribucionReal: false,
           ssMinBaseAplicada: false,
           ssMaxBaseAplicada: false,
           ssEmpresa: 0,
@@ -2196,7 +2264,7 @@
         };
       }
 
-      const cotizacionSS = calcularCotizacionSeguridadSocial(bruto, tipoContrato, grupoCotizacion, discapacidad, primaAtep);
+      const cotizacionSS = calcularCotizacionSeguridadSocial(bruto, tipoContrato, grupoCotizacion, discapacidad, primaAtep, cotizacionMode);
       let ss = cotizacionSS.total;
       if (ss > bruto) ss = bruto;
       const gastoActivoDiscapacidad = gastoDeducibleTrabajadorActivoDiscapacidad(discapacidad, movilidadReducida);
@@ -2253,12 +2321,16 @@
         ssBaseMensual: cotizacionSS.baseMensualCotizacion,
         ssBaseMensualTeorica: cotizacionSS.baseMensualTeorica,
         ssBaseMinMensual: cotizacionSS.baseMinMensual,
+        ssBaseMinAnualTiempoCompleto: cotizacionSS.baseMinAnualTiempoCompleto,
         ssContingenciasComunes: cotizacionSS.contingenciasComunes,
         ssDesempleo: cotizacionSS.desempleo,
         ssFormacion: cotizacionSS.formacion,
         ssMEI: cotizacionSS.mei,
         ssSolidaridad: cotizacionSS.solidaridad,
         ssDesempleoRate: cotizacionSS.desempleoRate,
+        ssCotizacionModeSolicitado: cotizacionSS.cotizacionModeSolicitado,
+        ssCotizacionModeAplicado: cotizacionSS.cotizacionModeAplicado,
+        ssAsumeRetribucionReal: cotizacionSS.asumeRetribucionReal,
         ssMinBaseAplicada: cotizacionSS.minBaseAplicada,
         ssMaxBaseAplicada: cotizacionSS.maxBaseAplicada,
         ssEmpresa: cotizacionSS.empresaTotal,
@@ -2376,11 +2448,8 @@
     function renderSocialSecurityRows(data) {
       const rows = [];
 
-      if (Math.abs(data.ssBaseAnual - data.g) > 0.5) {
-        const ajustes = [];
-
-        if (data.ssMinBaseAplicada) ajustes.push('base mínima');
-        if (data.ssMaxBaseAplicada) ajustes.push('tope máximo');
+      if (Math.abs(data.ssBaseAnual - data.g) > 0.5 || data.ssAsumeRetribucionReal) {
+        const ajustes = getContributionBaseAdjustments(data);
 
         rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Base de cotización estimada${ajustes.length ? ` (${ajustes.join(' y ')})` : ''}</span><span class="breakdown-value">${fmt(data.ssBaseAnual)}</span></div>`);
       }
@@ -2400,11 +2469,8 @@
     function renderEmployerSocialSecurityRows(data) {
       const rows = [];
 
-      if (Math.abs(data.ssBaseAnual - data.g) > 0.5) {
-        const ajustes = [];
-
-        if (data.ssMinBaseAplicada) ajustes.push('base mínima de grupo');
-        if (data.ssMaxBaseAplicada) ajustes.push('tope máximo');
+      if (Math.abs(data.ssBaseAnual - data.g) > 0.5 || data.ssAsumeRetribucionReal) {
+        const ajustes = getContributionBaseAdjustments(data);
 
         rows.push(`<div class="breakdown-row breakdown-subrow"><span class="breakdown-label">Base de cotización estimada${ajustes.length ? ` (${ajustes.join(' y ')})` : ''}</span><span class="breakdown-value">${fmt(data.ssBaseAnual)}</span></div>`);
       }
@@ -2458,6 +2524,19 @@
       return options.map(option => `<option value="${option.value}" ${selectedValue === option.value ? 'selected' : ''}>${option.label}</option>`).join('');
     }
 
+    function getContributionBaseAdjustments(data) {
+      const ajustes = [];
+
+      if (data.ssAsumeRetribucionReal) {
+        ajustes.push(data.ssCotizacionModeSolicitado === 'actual' ? 'retribución real' : 'auto · retribución real');
+      }
+
+      if (data.ssMinBaseAplicada) ajustes.push('base mínima de grupo');
+      if (data.ssMaxBaseAplicada) ajustes.push('tope máximo');
+
+      return ajustes;
+    }
+
     function calculateDataForGross(gross, state) {
       return calcularSalario(
         gross,
@@ -2469,7 +2548,8 @@
         state.familiaNumerosa,
         state.discapacidad,
         state.movilidadReducida,
-        state.primaAtep
+        state.primaAtep,
+        state.cotizacionMode
       );
     }
 
@@ -2610,6 +2690,7 @@
         rangoEdad: 'menor65',
         tipoContrato: 'indefinido',
         grupoCotizacion: '1',
+        cotizacionMode: 'auto',
         familiaNumerosa: 'ninguna',
         discapacidad: 'ninguna',
         movilidadReducida: false,
@@ -2657,6 +2738,7 @@
       state.rangoEdad = AGE_RANGE_VALUES.has(storedState.rangoEdad) ? storedState.rangoEdad : state.rangoEdad;
       state.tipoContrato = CONTRACT_TYPE_VALUES.has(storedState.tipoContrato) ? storedState.tipoContrato : state.tipoContrato;
       state.grupoCotizacion = normalizaGrupoCotizacion(storedState.grupoCotizacion);
+      state.cotizacionMode = normalizaModoCotizacionBase(storedState.cotizacionMode);
       state.familiaNumerosa = normalizaFamiliaNumerosa(storedState.familiaNumerosa);
       state.discapacidad = normalizaDiscapacidad(storedState.discapacidad, storedState.movilidadReducida);
       state.movilidadReducida = tieneMovilidadReducidaOAsistencia(state.discapacidad);
@@ -2680,6 +2762,7 @@
         rangoEdad: state.rangoEdad,
         tipoContrato: state.tipoContrato,
         grupoCotizacion: state.grupoCotizacion,
+        cotizacionMode: state.cotizacionMode,
         familiaNumerosa: state.familiaNumerosa,
         discapacidad: state.discapacidad,
         movilidadReducida: state.movilidadReducida,
@@ -2808,6 +2891,7 @@
       const territorySelectId = `${calcId}-territory`;
       const contractSelectId = `${calcId}-contract`;
       const groupSelectId = `${calcId}-group`;
+      const contributionModeSelectId = `${calcId}-contribution-mode`;
       const atEpRateId = `${calcId}-atep-rate`;
       const childrenSelectId = `${calcId}-children`;
       const childrenExactId = `${calcId}-children-exact`;
@@ -2853,6 +2937,12 @@
               <label for="${groupSelectId}">🧾 Grupo de cotización:</label>
               <select id="${groupSelectId}" class="group-select" data-calc-index="${calcIndex}">
                 ${renderSimpleOptions(CONTRIBUTION_GROUPS, state.grupoCotizacion)}
+              </select>
+            </div>
+            <div class="inline-select inline-gap">
+              <label for="${contributionModeSelectId}">🕒 Modalidad de cotización:</label>
+              <select id="${contributionModeSelectId}" class="contribution-base-mode-select" data-calc-index="${calcIndex}">
+                ${renderSimpleOptions(CONTRIBUTION_BASE_OPTIONS, state.cotizacionMode)}
               </select>
             </div>
             <div class="inline-select inline-gap">
@@ -2908,7 +2998,7 @@
               </div>
             </div>
             <div class="inline-select helper-text">
-              💡 Supuestos 2026: trabajador por cuenta ajena en Régimen General durante todo el año. La base mínima de grupo se aplica asumiendo jornada completa; no se modelan horas extra, retribución flexible ni contrato formativo en alternancia. La deducción por familia numerosa se activa manualmente y aproxima su límite por cotizaciones con la cuota obrera calculada; no se modelan abono anticipado, cesiones ni devoluciones por encima de cuota. La prima AT/EP depende de la actividad, CNAE u ocupación, por lo que debes introducirla manualmente: si la dejas en 0%, el coste empresa seguirá sin esa parte. La retención en nómina puede ajustarse para simular una solicitud voluntaria distinta de la calculada automáticamente; eso modifica el neto cobrado por paga, pero no el IRPF final estimado.
+              💡 Supuestos 2026: trabajador por cuenta ajena en Régimen General. La modalidad de cotización distingue entre jornada completa / año completo y retribución real para jornada parcial o periodos inferiores al año. En modo Auto, si el salario anual queda por debajo de la base mínima anual del grupo, la calculadora cotiza sobre la remuneración declarada para aproximar las reglas de tiempo parcial de la Orden PJC/297/2026; si el salario es compatible con jornada completa, aplica la base mínima mensual del grupo. No se modelan horas extra, retribución flexible ni contrato formativo en alternancia. La deducción por familia numerosa se activa manualmente y aproxima su límite por cotizaciones con la cuota obrera calculada; no se modelan abono anticipado, cesiones ni devoluciones por encima de cuota. La prima AT/EP depende de la actividad, CNAE u ocupación, por lo que debes introducirla manualmente: si la dejas en 0%, el coste empresa seguirá sin esa parte. La retención en nómina puede ajustarse para simular una solicitud voluntaria distinta de la calculada automáticamente; eso modifica el neto cobrado por paga, pero no el IRPF final estimado.
             </div>
             </div>
           </div>
@@ -3032,6 +3122,9 @@
 
       const groupSelect = calcDiv.querySelector('.group-select');
       if (groupSelect) groupSelect.value = state.grupoCotizacion;
+
+      const contributionModeSelect = calcDiv.querySelector('.contribution-base-mode-select');
+      if (contributionModeSelect) contributionModeSelect.value = state.cotizacionMode;
 
       const atEpInput = calcDiv.querySelector('.company-atep-input');
       if (atEpInput) {
@@ -3206,6 +3299,13 @@
         sel.addEventListener('change', function () {
           const calcIndex = Number(this.dataset.calcIndex);
           calculators[calcIndex].grupoCotizacion = this.value;
+          updateCalculatorUI(calcIndex);
+        });
+      });
+      document.querySelectorAll('.contribution-base-mode-select').forEach(sel => {
+        sel.addEventListener('change', function () {
+          const calcIndex = Number(this.dataset.calcIndex);
+          calculators[calcIndex].cotizacionMode = normalizaModoCotizacionBase(this.value);
           updateCalculatorUI(calcIndex);
         });
       });
