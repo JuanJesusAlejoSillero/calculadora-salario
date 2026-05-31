@@ -1005,7 +1005,7 @@
 
     .paycheck-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 1rem;
       text-align: center;
     }
@@ -1026,6 +1026,7 @@
     .paycheck-item-value {
       font-size: 1.2rem;
       font-weight: 600;
+      white-space: nowrap;
     }
 
     .paycheck-item-value.negative {
