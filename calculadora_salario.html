@@ -1122,6 +1122,25 @@
       color: var(--text-tertiary);
     }
 
+    .helper-disclosure {
+      margin-top: 8px;
+    }
+
+    .helper-summary {
+      cursor: pointer;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-tertiary);
+    }
+
+    .helper-summary:hover {
+      color: var(--text-secondary);
+    }
+
+    .helper-disclosure .helper-text {
+      margin-top: 6px;
+    }
+
     .deduction-rows:empty {
       display: none;
     }
@@ -1595,9 +1614,9 @@
     ];
 
     const CONTRIBUTION_BASE_OPTIONS = [
-      { value: 'auto', label: 'Auto · según salario declarado' },
-      { value: 'fulltime', label: 'Jornada completa · año completo' },
-      { value: 'actual', label: 'Retribución real · parcial / periodo inferior' }
+      { value: 'auto', label: 'Automática' },
+      { value: 'fulltime', label: 'Base mínima del grupo' },
+      { value: 'actual', label: 'Remuneración efectiva' }
     ];
 
     const DISABILITY_OPTIONS = [
@@ -2940,7 +2959,7 @@
               </select>
             </div>
             <div class="inline-select inline-gap">
-              <label for="${contributionModeSelectId}">🕒 Modalidad de cotización:</label>
+              <label for="${contributionModeSelectId}">🕒 Cálculo de cotización:</label>
               <select id="${contributionModeSelectId}" class="contribution-base-mode-select" data-calc-index="${calcIndex}">
                 ${renderSimpleOptions(CONTRIBUTION_BASE_OPTIONS, state.cotizacionMode)}
               </select>
@@ -2997,9 +3016,12 @@
                 </div>
               </div>
             </div>
-            <div class="inline-select helper-text">
-              💡 Supuestos 2026: trabajador por cuenta ajena en Régimen General. La modalidad de cotización distingue entre jornada completa / año completo y retribución real para jornada parcial o periodos inferiores al año. En modo Auto, si el salario anual queda por debajo de la base mínima anual del grupo, la calculadora cotiza sobre la remuneración declarada para aproximar las reglas de tiempo parcial de la Orden PJC/297/2026; si el salario es compatible con jornada completa, aplica la base mínima mensual del grupo. No se modelan horas extra, retribución flexible ni contrato formativo en alternancia. La deducción por familia numerosa se activa manualmente y aproxima su límite por cotizaciones con la cuota obrera calculada; no se modelan abono anticipado, cesiones ni devoluciones por encima de cuota. La prima AT/EP depende de la actividad, CNAE u ocupación, por lo que debes introducirla manualmente: si la dejas en 0%, el coste empresa seguirá sin esa parte. La retención en nómina puede ajustarse para simular una solicitud voluntaria distinta de la calculada automáticamente; eso modifica el neto cobrado por paga, pero no el IRPF final estimado.
-            </div>
+            <details class="helper-disclosure">
+              <summary class="helper-summary">💡 Supuestos 2026</summary>
+              <div class="helper-text">
+                Trabajador por cuenta ajena en Régimen General. Puedes calcular la cotización de tres formas: <strong>Automática</strong>, <strong>Base mínima del grupo</strong> o <strong>Remuneración efectiva</strong>. En <strong>Automática</strong>, si el salario anual queda por debajo de la base mínima anual del grupo, la calculadora usa el salario declarado para aproximar un caso parcial o un periodo inferior al año; si no, aplica la base mínima mensual del grupo. En <strong>Remuneración efectiva</strong>, usa el salario introducido sin forzar esa base mínima. No se modelan horas extra, retribución flexible ni contrato formativo en alternancia. La deducción por familia numerosa se activa manualmente y aproxima su límite por cotizaciones con la cuota obrera calculada; no se modelan abono anticipado, cesiones ni devoluciones por encima de cuota. La prima AT/EP depende de la actividad, CNAE u ocupación, por lo que debes introducirla manualmente: si la dejas en 0%, el coste empresa seguirá sin esa parte. La retención en nómina puede ajustarse para simular una solicitud voluntaria distinta de la calculada automáticamente; eso modifica el neto cobrado por paga, pero no el IRPF final estimado.
+              </div>
+            </details>
             </div>
           </div>
 

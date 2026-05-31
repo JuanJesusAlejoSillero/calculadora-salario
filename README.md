@@ -55,7 +55,7 @@ Si lo deseas, puedes activar el modo **Comparar salarios** para ver entre 2 y 10
 - Cálculo inverso del bruto anual a partir del neto mensual o del neto por paga.
 - Cálculo en 12, 13, 14, 15 o 16 pagas.
 - Escala diferenciada según territorio, incluyendo territorios forales y la deducción específica de Ceuta y Melilla.
-- Cotización del trabajador desglosada en contingencias comunes, desempleo, formación profesional, MEI y cuota de solidaridad, con tope máximo y selector de modalidad para distinguir jornada completa frente a retribución real en salarios bajos.
+- Cotización del trabajador desglosada en contingencias comunes, desempleo, formación profesional, MEI y cuota de solidaridad, con tope máximo y selector de modalidad con opciones `Automática`, `Base mínima del grupo` y `Remuneración efectiva`.
 - Coste empresa estimado, con desglose de cuotas empresariales de 2026 y AT/EP configurable manualmente según CNAE u ocupación.
 - Mínimos por descendientes con soporte para `5 o más hijos` indicando el número exacto.
 - Deducción explícita por familia numerosa general o especial, con incremento por hijos adicionales sobre el mínimo estándar de la categoría.
@@ -76,8 +76,8 @@ La calculadora aplica un modelo aproximado:
 
 - Seguridad Social del trabajador según el Régimen General 2026: 4,70% por contingencias comunes, desempleo del 1,55% o 1,60% según el contrato, 0,10% por formación profesional, 0,15% por MEI y cuota de solidaridad cuando el salario supera la base máxima anual.
 - Coste empresa aproximado según el Régimen General 2026: 23,60% por contingencias comunes, desempleo del 5,50% o 6,70% según el contrato, 0,20% de FOGASA, 0,60% por formación profesional, 0,75% por MEI, cuota de solidaridad empresarial cuando se supera la base máxima anual y la prima AT/EP que introduzca el usuario.
-- Base de cotización calculada con base máxima mensual de 5.101,20 € y conmutación entre base mínima mensual por grupo o retribución real según la modalidad de cotización elegida.
-- En modo `Auto`, si el salario anual no es compatible con una base mínima anual de jornada completa, la calculadora aproxima el caso como jornada parcial o periodo inferior al año y cotiza sobre la remuneración declarada, siguiendo la distinción entre reglas generales y tiempo parcial de la Orden PJC/297/2026.
+- Base de cotización calculada con base máxima mensual de 5.101,20 € y conmutación entre `Automática`, `Base mínima del grupo` o `Remuneración efectiva` según la modalidad elegida.
+- En modo `Automática`, si el salario anual no es compatible con una base mínima anual de jornada completa, la calculadora aproxima el caso como jornada parcial o periodo inferior al año y cotiza sobre la remuneración declarada, siguiendo la distinción entre reglas generales y tiempo parcial de la Orden PJC/297/2026.
 - La prima por accidentes de trabajo y enfermedades profesionales depende de la actividad y de la tarifa de primas aplicable al CNAE u ocupación, por lo que se configura manualmente; si no se informa, el coste empresa queda sin esa parte.
 - Rendimiento neto del trabajo: bruto anual menos Seguridad Social y 2.000 € de gastos deducibles generales, más el gasto adicional por trabajador activo con discapacidad cuando procede.
 - Reducción por obtención de rendimientos del trabajo según el artículo 20 de la LIRPF para salarios bajos.
